@@ -52,8 +52,7 @@ class SimulationEngine extends ChangeNotifier {
   int radioRetries = 0;
   DateTime lastPhoneFix = DateTime.now();
   DateTime lastBagFix = DateTime.now();
-  String? scenarioCaption;      // demo movie HUD caption
-  String? scenarioPhase;        // machine-readable phase
+  String? scenarioPhase;        // machine-readable demo phase (caption resolved in UI)
   bool scenarioRunning = false;
   double speedMultiplier = 1;   // 1x / 4x / 8x for stakeholders
 
@@ -95,7 +94,7 @@ class SimulationEngine extends ChangeNotifier {
     bagRoute
       ..clear()
       ..add(bagPos);
-    _logEvent(TrackEventType.locationUpdate, 'Tracking session started · fused GPS + radio');
+    _logEvent(TrackEventType.locationUpdate, code: 'sessionStarted');
   }
 
   @override
@@ -142,14 +141,13 @@ class SimulationEngine extends ChangeNotifier {
       if (status == TrackStatus.panic || status == TrackStatus.lost) {
         status = TrackStatus.recovering;
         scenarioPhase = 'reconnected';
-        scenarioCaption = 'Signal re-established · confirm your bag to end panic mode';
         _logEvent(TrackEventType.recovered,
-            'Radio link restored at ${distance.round()} m · fused fix accuracy ±${bagAccuracyM.toStringAsFixed(1)} m');
+            code: 'linkRestored',
+            params: {'meters': distance.round(), 'accuracy': bagAccuracyM.toStringAsFixed(1)});
       }
     }
     if (_phoneReturning && distance <= nearM) {
       scenarioPhase = 'near';
-      scenarioCaption = 'You are within ${distance.round()} m of your bag';
     }
 
     // 5. signals / thresholds
@@ -212,9 +210,9 @@ class SimulationEngine extends ChangeNotifier {
       lostAlertActive = true;
       status = TrackStatus.lost;
       scenarioPhase = 'lost';
-      scenarioCaption = 'Loss detected · panic mode initiating';
       _logEvent(TrackEventType.lost,
-          'Bag distance ${distance.round()} m · exceeded ${lostM.round()} m limit');
+          code: 'distanceExceeded',
+          params: {'meters': distance.round(), 'limit': lostM.round()});
       Future.delayed(const Duration(milliseconds: 1600), () {
         if (inDanger || lostAlertActive) enterPanic();
       });
@@ -223,8 +221,7 @@ class SimulationEngine extends ChangeNotifier {
       if (status == TrackStatus.tracking) {
         status = TrackStatus.warning;
         scenarioPhase = 'warning';
-        scenarioCaption = 'Distance growing · monitoring for loss';
-        _logEvent(TrackEventType.warning, 'Unusual distance increase · ${distance.round()} m');
+        _logEvent(TrackEventType.warning, code: 'unusualDistance', params: {'meters': distance.round()});
       }
     } else if (distance < warningM) {
       _warningFired = false;
@@ -232,7 +229,6 @@ class SimulationEngine extends ChangeNotifier {
       if (!_phoneReturning && status == TrackStatus.warning) {
         status = TrackStatus.tracking;
         scenarioPhase = null;
-        scenarioCaption = null;
       }
     }
   }
@@ -249,18 +245,21 @@ class SimulationEngine extends ChangeNotifier {
     }
     final bagEvery = (_settings.bagGpsIntervalS / 0.9).round().clamp(1, 60);
     if (_tick % bagEvery == 0 && radioOk && status != TrackStatus.found) {
-      _logEvent(TrackEventType.locationUpdate,
-          'Bag GPS fix · ±${bagAccuracyM.toStringAsFixed(1)} m${isPanic ? ' · high-frequency' : ''}',
-          quiet: true);
+      _logEvent(
+        TrackEventType.locationUpdate,
+        code: isPanic ? 'bagGpsFixPanic' : 'bagGpsFix',
+        params: {'accuracy': bagAccuracyM.toStringAsFixed(1)},
+        quiet: true,
+      );
     }
   }
 
-  void _logEvent(TrackEventType type, String detail, {bool quiet = false}) {
-    events.add(TrackEvent(time: DateTime.now(), type: type, detail: detail));
+  void _logEvent(TrackEventType type, {required String code, Map<String, Object> params = const {}, bool quiet = false}) {
+    events.add(TrackEvent(time: DateTime.now(), type: type, code: code, params: params));
     if (events.length > 300) events.removeAt(0);
     if (!quiet && kDebugMode) {
       // ignore: avoid_print
-      print('[trackio] $type $detail');
+      print('[trackio] $type $code $params');
     }
   }
 
@@ -271,14 +270,13 @@ class SimulationEngine extends ChangeNotifier {
     if (_bagLeftSpot != null) return;
     _bagLeftSpot = bagPos;
     scenarioPhase = 'drifting';
-    scenarioCaption = 'Bag left behind · you are walking away';
-    _logEvent(TrackEventType.warning, 'Bag motion pattern changed · stationary');
+    _logEvent(TrackEventType.warning, code: 'motionChanged');
   }
 
   void cutConnection() {
     if (connectionCut) return;
     connectionCut = true;
-    _logEvent(TrackEventType.connectionLost, 'ESP32 radio link lost · retrying…');
+    _logEvent(TrackEventType.connectionLost, code: 'linkLost');
     _startRadioRetry();
     notifyListeners();
   }
@@ -300,7 +298,7 @@ class SimulationEngine extends ChangeNotifier {
     connectionCut = false;
     radioRetries = 0;
     bagAccuracyM = 8;
-    if (logIt) _logEvent(TrackEventType.reconnect, 'Radio link re-established · ESP32 handshake OK');
+    if (logIt) _logEvent(TrackEventType.reconnect, code: 'linkReestablished');
     notifyListeners();
   }
 
@@ -308,16 +306,14 @@ class SimulationEngine extends ChangeNotifier {
     if (status == TrackStatus.panic || status == TrackStatus.found) return;
     status = TrackStatus.panic;
     scenarioPhase = 'panic';
-    scenarioCaption = 'PANIC MODE · high-frequency pings + fused tracking';
-    _logEvent(TrackEventType.panicSent, 'Panic packet → bag module · 1 Hz fix request');
+    _logEvent(TrackEventType.panicSent, code: 'panicPacket');
     panicPings.add(bagPos);
     notifyListeners();
   }
 
   void sendPanicPacket() {
     panicPacketsSent++;
-    _logEvent(TrackEventType.panicSent,
-        'Panic packet #\$panicPacketsSent · requesting immediate fix', quiet: true);
+    _logEvent(TrackEventType.panicSent, code: 'panicPacketN', params: {'n': panicPacketsSent}, quiet: true);
     notifyListeners();
   }
 
@@ -328,8 +324,7 @@ class SimulationEngine extends ChangeNotifier {
       status = TrackStatus.recovering;
     }
     scenarioPhase = 'recovering';
-    scenarioCaption = 'Recovery route active · guiding you back';
-    _logEvent(TrackEventType.recovered, 'Recovery started · navigating to last fused fix');
+    _logEvent(TrackEventType.recovered, code: 'recoveryStarted');
     notifyListeners();
   }
 
@@ -337,11 +332,10 @@ class SimulationEngine extends ChangeNotifier {
     status = TrackStatus.found;
     lostAlertActive = false;
     scenarioPhase = 'found';
-    scenarioCaption = 'Bag recovered';
     scenarioRunning = false;
     _phoneReturning = false;
     _bagLeftSpot = null;
-    _logEvent(TrackEventType.found, 'User confirmed recovery at ${distance.round()} m');
+    _logEvent(TrackEventType.found, code: 'recoveryConfirmed', params: {'meters': distance.round()});
     notifyListeners();
   }
 
@@ -366,7 +360,6 @@ class SimulationEngine extends ChangeNotifier {
     lostAlertActive = false;
     status = TrackStatus.tracking;
     scenarioPhase = null;
-    scenarioCaption = null;
     scenarioRunning = false;
     phonePos = zamalekStart;
     bagPos = zamalekStart;
@@ -410,8 +403,7 @@ class SimulationEngine extends ChangeNotifier {
         bagPos = _bagLeftSpot!;
         distance = 46;
         status = TrackStatus.warning;
-        scenarioCaption = 'Distance growing · monitoring for loss';
-        _logEvent(TrackEventType.warning, 'Unusual distance increase · 46 m');
+        _logEvent(TrackEventType.warning, code: 'unusualDistance', params: {'meters': 46});
       case 'alert' || 'panic' || 'lost':
         _bagLeftSpot = LatLng(base.latitude + 0.00085, base.longitude + 0.00075);
         bagPos = _bagLeftSpot!;
@@ -421,22 +413,19 @@ class SimulationEngine extends ChangeNotifier {
         panicPacketsSent = 14;
         panicPings.add(bagPos);
         scenarioPhase = 'panic';
-        scenarioCaption = 'PANIC MODE · high-frequency pings + fused tracking';
-        _logEvent(TrackEventType.lost, 'Bag distance 128 m · exceeded 80 m limit');
-        _logEvent(TrackEventType.panicSent, 'Panic packet → bag module · 1 Hz fix request');
+        _logEvent(TrackEventType.lost, code: 'distanceExceeded', params: {'meters': 128, 'limit': 80});
+        _logEvent(TrackEventType.panicSent, code: 'panicPacket');
       case 'found':
         status = TrackStatus.found;
         scenarioPhase = 'found';
-        scenarioCaption = 'Bag recovered';
-        _logEvent(TrackEventType.found, 'User confirmed recovery at 7 m');
+        _logEvent(TrackEventType.found, code: 'recoveryConfirmed', params: {'meters': 7});
       case 'recovering':
         _bagLeftSpot = LatLng(base.latitude + 0.00042, base.longitude + 0.00036);
         bagPos = _bagLeftSpot!;
         distance = 52;
         status = TrackStatus.recovering;
         scenarioPhase = 'recovering';
-        scenarioCaption = 'Recovery route active · guiding you back';
-        _logEvent(TrackEventType.recovered, 'Recovery started · navigating to last fused fix');
+        _logEvent(TrackEventType.recovered, code: 'recoveryStarted');
       default:
         break;
     }
@@ -483,32 +472,36 @@ class SimulationEngine extends ChangeNotifier {
       TrackEvent(
         time: t0,
         type: TrackEventType.locationUpdate,
-        detail: 'Tracking session started · fused GPS + radio',
+        code: 'sessionStarted',
       ),
       TrackEvent(
         time: t0.add(const Duration(minutes: 41)),
         type: TrackEventType.warning,
-        detail: 'Unusual distance increase · 34 m',
+        code: 'unusualDistance',
+        params: {'meters': 34},
       ),
       TrackEvent(
         time: t0.add(const Duration(minutes: 44)),
         type: TrackEventType.lost,
-        detail: 'Bag distance 96 m · exceeded 80 m limit',
+        code: 'distanceExceeded',
+        params: {'meters': 96, 'limit': 80},
       ),
       TrackEvent(
         time: t0.add(const Duration(minutes: 44, seconds: 8)),
         type: TrackEventType.panicSent,
-        detail: 'Panic packet → bag module · 1 Hz fix request',
+        code: 'panicPacket',
       ),
       TrackEvent(
         time: t0.add(const Duration(minutes: 52)),
         type: TrackEventType.recovered,
-        detail: 'Radio link restored at 18 m · fused fix accuracy ±3.2 m',
+        code: 'linkRestored',
+        params: {'meters': 18, 'accuracy': '3.2'},
       ),
       TrackEvent(
         time: t0.add(const Duration(minutes: 57)),
         type: TrackEventType.found,
-        detail: 'User confirmed recovery at 6 m',
+        code: 'recoveryConfirmed',
+        params: {'meters': 6},
       ),
     ]);
     // today's calm session

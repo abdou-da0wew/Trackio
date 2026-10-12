@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../core/formatters.dart';
 import '../../core/palette.dart';
 import '../../core/theme.dart';
+import '../../core/l10n_text.dart';
 import '../../models/models.dart';
 import '../../services/simulation_engine.dart';
 import '../widgets/common.dart';
@@ -16,6 +17,7 @@ class HistoryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tk = tkOf(context);
+    final l = l10nOf(context);
     final engine = context.watch<SimulationEngine>();
 
     final lostEvents = engine.events.where((e) => e.type == TrackEventType.lost).length;
@@ -25,7 +27,7 @@ class HistoryScreen extends StatelessWidget {
             engine.distanceHistory.length;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('History')),
+      appBar: AppBar(title: Text(l.historyTitle)),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 6, 20, 26),
         children: [
@@ -34,7 +36,7 @@ class HistoryScreen extends StatelessWidget {
             children: [
               Expanded(
                 child: _Summary(
-                  label: 'LOSS ALERTS',
+                  label: l.lossAlerts,
                   value: '$lostEvents',
                   icon: Icons.crisis_alert_rounded,
                   color: Semantic.danger,
@@ -43,8 +45,8 @@ class HistoryScreen extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: _Summary(
-                  label: 'AVG DISTANCE',
-                  value: Fmt.distance(avg),
+                  label: l.avgDistance,
+                  value: l.dist(avg),
                   icon: Icons.straighten_rounded,
                   color: SmartBlue.c600,
                 ),
@@ -52,7 +54,7 @@ class HistoryScreen extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: _Summary(
-                  label: 'DATA POINTS',
+                  label: l.dataPoints,
                   value: '${engine.distanceHistory.length}',
                   icon: Icons.query_stats_rounded,
                   color: Sapphire.c700,
@@ -61,7 +63,7 @@ class HistoryScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 22),
-          SectionLabel('DISTANCE TIMELINE'),
+          SectionLabel(l.distanceTimeline),
           TkCard(
             padding: const EdgeInsets.fromLTRB(14, 18, 18, 10),
             child: SizedBox(
@@ -73,18 +75,18 @@ class HistoryScreen extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _Legend(color: SmartBlue.c600, label: 'safe range'),
+              _Legend(color: SmartBlue.c600, label: l.legendSafe),
               const SizedBox(width: 18),
-              _Legend(color: Semantic.danger, label: 'loss events'),
+              _Legend(color: Semantic.danger, label: l.legendLoss),
             ],
           ),
           const SizedBox(height: 22),
-          SectionLabel('EVENT LOG'),
+          SectionLabel(l.eventLog),
           if (engine.events.isEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 30),
               child: Text(
-                'No events yet — start the demo scenario.',
+                l.noEventsYet,
                 textAlign: TextAlign.center,
                 style: TextStyle(color: tk.textTertiary, fontSize: 13),
               ),

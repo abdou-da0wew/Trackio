@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../core/l10n_text.dart';
 import '../../core/palette.dart';
 import '../../core/theme.dart';
 import '../../services/mock_auth_service.dart';
@@ -15,13 +16,19 @@ class OtpScreen extends StatefulWidget {
   State<OtpScreen> createState() => _OtpScreenState();
 }
 
-class _OtpScreenState extends State<OtpScreen> {
+class _OtpScreenState extends State<OtpScreen> with SingleTickerProviderStateMixin {
   final _controllers = List.generate(6, (_) => TextEditingController());
   final _nodes = List.generate(6, (_) => FocusNode());
   bool _busy = false;
   bool _error = false;
   int _resendIn = 30;
   Timer? _timer;
+
+  /// shake feedback for a wrong code
+  late final AnimationController _shake = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 380),
+  );
 
   @override
   void initState() {
@@ -42,6 +49,7 @@ class _OtpScreenState extends State<OtpScreen> {
   @override
   void dispose() {
     _timer?.cancel();
+    _shake.dispose();
     for (final c in _controllers) {
       c.dispose();
     }
@@ -70,6 +78,7 @@ class _OtpScreenState extends State<OtpScreen> {
         _busy = false;
         _error = true;
       });
+      _shake.forward(from: 0); // error micro-interaction: shake the boxes
     }
   }
 
@@ -85,6 +94,7 @@ class _OtpScreenState extends State<OtpScreen> {
   @override
   Widget build(BuildContext context) {
     final tk = tkOf(context);
+    final l = l10nOf(context);
     final auth = context.watch<AuthService>();
     return Scaffold(
       appBar: AppBar(leading: const BackButton()),
@@ -107,7 +117,7 @@ class _OtpScreenState extends State<OtpScreen> {
               ),
               const SizedBox(height: 26),
               Text(
-                'Verify your email',
+                l.otpTitle,
                 style: GoogleFonts.rubik(fontSize: 27,
                   fontWeight: FontWeight.w700,
                   color: tk.textPrimary,
@@ -116,25 +126,34 @@ class _OtpScreenState extends State<OtpScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                'We sent a 6-digit code to ${auth.pendingEmail ?? 'your email'}.',
+                l.otpSentTo(auth.pendingEmail ?? l.otpFallbackEmail),
                 style: TextStyle(fontSize: 14, color: tk.textSecondary, height: 1.5),
               ),
               const SizedBox(height: 30),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: List.generate(6, (i) => _box(i)),
+              // OTP boxes — shake horizontally when the code is wrong
+              AnimatedBuilder(
+                animation: _shake,
+                builder: (context, child) {
+                  final t = _shake.value;
+                  final dx = t == 0 ? 0.0 : math.sin(t * math.pi * 3) * (1 - t) * 12;
+                  return Transform.translate(offset: Offset(dx, 0), child: child!);
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: List.generate(6, (i) => _box(i)),
+                ),
               ),
               if (_error) ...[
                 const SizedBox(height: 14),
                 Text(
-                  'Incorrect code — check the demo hint below.',
+                  l.otpIncorrect,
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 12.5, color: Semantic.danger),
                 ),
               ],
               const SizedBox(height: 28),
               GradientButton(
-                label: _busy ? 'Verifying…' : 'Verify & continue',
+                label: _busy ? l.otpVerifying : l.otpVerify,
                 icon: Icons.shield_outlined,
                 onTap: (_busy || _code.length < 6) ? null : _verify,
               ),
@@ -142,10 +161,10 @@ class _OtpScreenState extends State<OtpScreen> {
               Center(
                 child: _resendIn > 0
                     ? Text(
-                        'Resend code in ${_resendIn}s',
+                        l.otpResendIn(_resendIn),
                         style: TextStyle(fontSize: 13, color: tk.textTertiary),
                       )
-                    : TextButton(onPressed: _resend, child: const Text('Resend code')),
+                    : TextButton(onPressed: _resend, child: Text(l.otpResend)),
               ),
               const SizedBox(height: 22),
               Container(
@@ -162,8 +181,8 @@ class _OtpScreenState extends State<OtpScreen> {
                     Expanded(
                       child: Text(
                         auth.demoOtp != null
-                            ? 'Demo OTP: ${auth.demoOtp!.substring(0, 3)} ${auth.demoOtp!.substring(3)} — production sends this via Supabase.'
-                            : 'Demo build — OTP shown here instead of email.',
+                            ? l.otpDemoHint(auth.demoOtp!)
+                            : l.otpDemoNoCode,
                         style: GoogleFonts.rubik(
                           fontSize: 12.5,
                           color: tk.textSecondary,
@@ -179,7 +198,7 @@ class _OtpScreenState extends State<OtpScreen> {
                         onPressed: () {
                           Clipboard.setData(ClipboardData(text: auth.demoOtp!));
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Code copied')),
+                            SnackBar(content: Text(l.codeCopied)),
                           );
                         },
                       ),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../core/l10n_text.dart';
+import '../../core/palette.dart';
 import '../../core/theme.dart';
 import '../../models/models.dart';
 import '../../services/scenario_director.dart';
@@ -14,6 +16,11 @@ import 'map_screen.dart';
 import 'settings_screen.dart';
 
 /// App shell: 4 tabs + alert overlay + scenario caption HUD + demo lab.
+///
+/// Perf note: the shell does NOT rebuild on engine ticks. Sound edge-triggers
+/// and the "found" confirmation live in an engine listener; the two widgets
+/// that need live data (caption HUD, alert overlay) listen to the engine
+/// themselves, so tab content stays steady while the simulation runs.
 class ShellScreen extends StatefulWidget {
   const ShellScreen({super.key});
   @override
@@ -23,6 +30,9 @@ class ShellScreen extends StatefulWidget {
 class _ShellScreenState extends State<ShellScreen> {
   int _index = 0;
   bool _readArgs = false;
+  bool _wasDanger = false;
+  TrackStatus _prevStatus = TrackStatus.tracking;
+  SimulationEngine? _engine;
 
   @override
   void initState() {
@@ -38,80 +48,111 @@ class _ShellScreenState extends State<ShellScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    final engine = context.read<SimulationEngine>();
+    if (_engine != engine) {
+      _engine?.removeListener(_onEngineTick);
+      _engine = engine..addListener(_onEngineTick);
+    }
     if (!_readArgs) {
       _readArgs = true;
       final arg = ModalRoute.of(context)?.settings.arguments;
       if (arg is int && arg >= 0 && arg <= 3) _index = arg;
     }
   }
-  bool _wasDanger = false;
-  TrackStatus _prevStatus = TrackStatus.tracking;
+
+  @override
+  void dispose() {
+    _engine?.removeListener(_onEngineTick);
+    super.dispose();
+  }
+
+  /// Edge-triggered sound hooks + recovery confirmation toast.
+  void _onEngineTick() {
+    if (!mounted) return;
+    final engine = _engine!;
+    final sound = context.read<SoundService>();
+    final settings = context.read<SettingsService>();
+    if (engine.inDanger && !_wasDanger) {
+      sound.playAlert(settings.sound);
+    }
+    if (engine.status == TrackStatus.found && _prevStatus != TrackStatus.found) {
+      sound.playSuccess();
+      final l = l10nOf(context);
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(
+          SnackBar(
+            duration: const Duration(seconds: 3),
+            content: Row(
+              children: [
+                const Icon(Icons.verified_rounded, size: 18, color: Semantic.success),
+                const SizedBox(width: 10),
+                Expanded(child: Text(l.foundToast)),
+              ],
+            ),
+          ),
+        );
+    }
+    _wasDanger = engine.inDanger;
+    _prevStatus = engine.status;
+  }
 
   @override
   Widget build(BuildContext context) {
     final engine = context.read<SimulationEngine>();
-    final sound = context.read<SoundService>();
-    final settings = context.read<SettingsService>();
+    final l = l10nOf(context);
+    final tk = tkOf(context);
 
     return Scaffold(
-      body: AnimatedBuilder(
-        animation: engine,
-        builder: (context, _) {
-          // alert sound hooks (edge-triggered)
-          if (engine.inDanger && !_wasDanger) {
-            sound.playAlert(settings.sound);
-          }
-          if (engine.status == TrackStatus.found && _prevStatus != TrackStatus.found) {
-            sound.playSuccess();
-          }
-          _wasDanger = engine.inDanger;
-          _prevStatus = engine.status;
-
-          return Stack(
+      body: Stack(
+        children: [
+          IndexedStack(
+            index: _index,
             children: [
-              IndexedStack(
-                index: _index,
-                children: [
-                  DashboardScreen(onGoMap: () => setState(() => _index = 1), onDemo: _openDemo),
-                  MapScreen(onDemo: _openDemo),
-                  const HistoryScreen(),
-                  const SettingsScreen(),
-                ],
-              ),
-              // scenario caption HUD
-              Positioned(
-                top: MediaQuery.paddingOf(context).top + 8,
-                left: 18,
-                right: 18,
-                child: IgnorePointer(
-                  child: AnimatedSwitcher(
+              DashboardScreen(onGoMap: () => setState(() => _index = 1), onDemo: _openDemo),
+              MapScreen(onDemo: _openDemo),
+              const HistoryScreen(),
+              const SettingsScreen(),
+            ],
+          ),
+          // scenario caption HUD — listens to the engine in isolation
+          Positioned(
+            top: MediaQuery.paddingOf(context).top + 8,
+            left: 18,
+            right: 18,
+            child: IgnorePointer(
+              child: ListenableBuilder(
+                listenable: engine,
+                builder: (context, _) {
+                  final text = engine.scenarioRunning ? l.scenarioCaption(engine) : '';
+                  return AnimatedSwitcher(
                     duration: const Duration(milliseconds: 320),
-                    child: engine.scenarioRunning && engine.scenarioCaption != null
-                        ? _CaptionHud(key: ValueKey(engine.scenarioCaption), engine: engine)
+                    child: text.isNotEmpty
+                        ? _CaptionHud(key: ValueKey(text), text: text)
                         : const SizedBox.shrink(),
-                  ),
-                ),
-              ),
-              // alert overlay
-              AlertOverlay(
-                engine: engine,
-                onOpenMap: () {
-                  engine.clearAlertFlag();
-                  setState(() => _index = 1);
+                  );
                 },
               ),
-            ],
-          );
-        },
+            ),
+          ),
+          // alert overlay
+          AlertOverlay(
+            engine: engine,
+            onOpenMap: () {
+              engine.clearAlertFlag();
+              setState(() => _index = 1);
+            },
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton.small(
         heroTag: 'demo-lab',
         elevation: 0,
-        backgroundColor: tkOf(context).card,
-        foregroundColor: tkOf(context).accent,
+        backgroundColor: tk.card,
+        foregroundColor: tk.accent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(15),
-          side: BorderSide(color: tkOf(context).stroke),
+          side: BorderSide(color: tk.stroke),
         ),
         onPressed: _openDemo,
         child: const Icon(Icons.science_rounded, size: 20),
@@ -119,11 +160,11 @@ class _ShellScreenState extends State<ShellScreen> {
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
         onDestinationSelected: (i) => setState(() => _index = i),
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.space_dashboard_outlined), selectedIcon: Icon(Icons.space_dashboard_rounded), label: 'Home'),
-          NavigationDestination(icon: Icon(Icons.map_outlined), selectedIcon: Icon(Icons.map_rounded), label: 'Map'),
-          NavigationDestination(icon: Icon(Icons.history_outlined), selectedIcon: Icon(Icons.history_rounded), label: 'History'),
-          NavigationDestination(icon: Icon(Icons.settings_outlined), selectedIcon: Icon(Icons.settings_rounded), label: 'Settings'),
+        destinations: [
+          NavigationDestination(icon: const Icon(Icons.space_dashboard_outlined), selectedIcon: const Icon(Icons.space_dashboard_rounded), label: l.tabHome),
+          NavigationDestination(icon: const Icon(Icons.map_outlined), selectedIcon: const Icon(Icons.map_rounded), label: l.tabMap),
+          NavigationDestination(icon: const Icon(Icons.history_outlined), selectedIcon: const Icon(Icons.history_rounded), label: l.tabHistory),
+          NavigationDestination(icon: const Icon(Icons.settings_outlined), selectedIcon: const Icon(Icons.settings_rounded), label: l.tabSettings),
         ],
       ),
     );
@@ -137,8 +178,8 @@ class _ShellScreenState extends State<ShellScreen> {
 }
 
 class _CaptionHud extends StatelessWidget {
-  final SimulationEngine engine;
-  const _CaptionHud({super.key, required this.engine});
+  final String text;
+  const _CaptionHud({super.key, required this.text});
 
   @override
   Widget build(BuildContext context) {
@@ -157,7 +198,7 @@ class _CaptionHud extends StatelessWidget {
           const SizedBox(width: 10),
           Expanded(
             child: Text(
-              engine.scenarioCaption!,
+              text,
               maxLines: 2,
               style: TextStyle(
                 fontSize: 12.5,

@@ -6,6 +6,10 @@ import 'simulation_engine.dart';
 /// One tap plays the entire loss-recovery story with captions. Every phase
 /// maps to real engine state transitions so the UI, alerts and history all
 /// react exactly as they would in production.
+///
+/// Captions are NOT stored here — the engine only carries the machine
+/// readable [SimulationEngine.scenarioPhase]; the UI resolves the localized
+/// caption text (see `core/l10n_text.dart`).
 class ScenarioDirector {
   ScenarioDirector(this._engine);
 
@@ -20,21 +24,20 @@ class ScenarioDirector {
     _engine.resetSession();
     _engine.scenarioRunning = true;
     _engine.scenarioPhase = 'intro';
-    _engine.scenarioCaption = 'Live tracking · bag within radio range';
     _engine.setSpeed(4); // brisk story pacing, still readable
     _engine.start();
     _engine.notifyUI();
 
-    _after(14, () => _phase('leftBehind', 'You walked on… the bag stayed at the café', () {
+    _after(14, () => _phase('leftBehind', () {
           _engine.driftAway();
         }));
 
     // warning triggers naturally at 30 m; lost triggers at 80 m → engine fires
     // the alert, plays the alarm and auto-enters panic mode (1600 ms).
 
-    _whenPhase('panic', () => _phase('panic', 'PANIC MODE · high-frequency pings every second', () {
+    _whenPhase('panic', () => _phase('panic', () {
           _every(2, (_) => _engine.sendPanicPacket());
-          _after(9, () => _phase('recovering', 'Recovery route · guiding you back to your bag', () {
+          _after(9, () => _phase('recovering', () {
                 _engine.beginRecovery();
               }));
         }));
@@ -42,16 +45,15 @@ class ScenarioDirector {
     // when distance ≤ 25 m the engine logs 'reconnected'; near ≤ 9 m the UI
     // prompts the user (auto-confirm after a beat in movie mode).
     _whenPhase('near', () {
-      _after(5, () => _phase('found', 'Bag recovered', () {
+      _after(5, () => _phase('found', () {
             _engine.markFound();
             _engine.setSpeed(1);
           }));
     });
   }
 
-  void _phase(String name, String caption, void Function() action) {
+  void _phase(String name, void Function() action) {
     _engine.scenarioPhase = name;
-    _engine.scenarioCaption = caption;
     action();
     _engine.notifyUI();
   }

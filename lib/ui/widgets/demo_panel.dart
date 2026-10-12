@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme.dart';
+import '../../core/l10n_text.dart';
 import '../../services/scenario_director.dart';
 import '../../services/simulation_engine.dart';
 import 'common.dart';
@@ -14,6 +15,7 @@ class DemoPanel {
     required ScenarioDirector director,
   }) {
     final tk = tkOf(context);
+    final l = l10nOf(context);
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -47,7 +49,7 @@ class DemoPanel {
                 Row(
                   children: [
                     Text(
-                      'Demo Controls',
+                      l.demoControls,
                       style: GoogleFonts.rubik(fontSize: 19, fontWeight: FontWeight.w700, color: tk.textPrimary),
                     ),
                     const Spacer(),
@@ -56,7 +58,7 @@ class DemoPanel {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'Play the full loss-recovery story, or trigger individual events manually.',
+                  l.demoSubtitle,
                   style: TextStyle(fontSize: 12.5, color: tk.textSecondary),
                 ),
                 const SizedBox(height: 16),
@@ -76,15 +78,15 @@ class DemoPanel {
                           Icon(Icons.auto_awesome_rounded, size: 17, color: tk.accent),
                           const SizedBox(width: 8),
                           Text(
-                            'Scripted scenario',
+                            l.scriptedScenario,
                             style: GoogleFonts.rubik(fontWeight: FontWeight.w700, fontSize: 14, color: tk.textPrimary),
                           ),
                           const Spacer(),
-                          if (engine.scenarioCaption != null)
+                          if (engine.scenarioPhase != null)
                             Flexible(
                               child: Text(
-                                engine.scenarioCaption!,
-                                textAlign: TextAlign.right,
+                                l.scenarioCaption(engine),
+                                textAlign: TextAlign.start,
                                 maxLines: 2,
                                 style: TextStyle(fontSize: 10.5, color: tk.textTertiary),
                               ),
@@ -98,10 +100,10 @@ class DemoPanel {
                                 director.stop();
                                 engine.resetSession();
                               },
-                              child: const Text('Stop scenario'),
+                              child: Text(l.stopScenario),
                             )
                           : GradientButton(
-                              label: 'Start demo scenario',
+                              label: l.startScenario,
                               icon: Icons.play_arrow_rounded,
                               onTap: () => director.start(),
                             ),
@@ -110,7 +112,7 @@ class DemoPanel {
                 ),
                 const SizedBox(height: 18),
                 Text(
-                  'MANUAL TRIGGERS',
+                  l.manualTriggers,
                   style: TextStyle(fontSize: 11, letterSpacing: 1.4, fontWeight: FontWeight.w700, color: tk.textTertiary),
                 ),
                 const SizedBox(height: 10),
@@ -119,7 +121,7 @@ class DemoPanel {
                 Row(
                   children: [
                     Text(
-                      'SPEED',
+                      l.speed,
                       style: TextStyle(fontSize: 11, letterSpacing: 1.4, fontWeight: FontWeight.w700, color: tk.textTertiary),
                     ),
                     const SizedBox(width: 14),
@@ -152,13 +154,14 @@ class _Grid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = l10nOf(context);
     final items = [
-      ('Left bag behind', Icons.luggage_rounded, engine.driftAway),
-      ('Cut radio link', Icons.link_off_rounded, engine.cutConnection),
-      ('Panic packet', Icons.crisis_alert_rounded, engine.enterPanic),
-      ('Recover', Icons.navigation_rounded, engine.beginRecovery),
-      ('Mark found', Icons.verified_rounded, engine.markFound),
-      ('Reset session', Icons.restart_alt_rounded, () => engine.resetSession()),
+      (l.trigLeftBag, Icons.luggage_rounded, engine.driftAway),
+      (l.trigCutLink, Icons.link_off_rounded, engine.cutConnection),
+      (l.trigPanicPacket, Icons.crisis_alert_rounded, engine.enterPanic),
+      (l.trigRecover, Icons.navigation_rounded, engine.beginRecovery),
+      (l.trigMarkFound, Icons.verified_rounded, engine.markFound),
+      (l.trigReset, Icons.restart_alt_rounded, () => engine.resetSession()),
     ];
     final tk = tkOf(context);
     return GridView.count(

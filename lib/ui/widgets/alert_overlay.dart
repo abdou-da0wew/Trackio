@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../core/formatters.dart';
 import '../../core/palette.dart';
 import '../../core/theme.dart';
+import '../../core/l10n_text.dart';
 import '../../models/models.dart';
 import '../../services/simulation_engine.dart';
 import 'common.dart';
@@ -58,6 +58,7 @@ class _AlertBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tk = tkOf(context);
+    final l = l10nOf(context);
     final e = engine;
     return Container(
       color: Prussian3.c100.withValues(alpha: .885),
@@ -74,7 +75,7 @@ class _AlertBody extends StatelessWidget {
                   IconButton2(
                     icon: Icons.close_rounded,
                     onTap: onOpenMap, // collapse overlay, keep panic HUD minimal on map
-                    tooltip: 'Minimise',
+                    tooltip: l.minimise,
                   ),
                 ],
               ),
@@ -99,7 +100,7 @@ class _AlertBody extends StatelessWidget {
               ),
               const SizedBox(height: 26),
               Text(
-                'Your bag may be lost',
+                l.alertTitle,
                 textAlign: TextAlign.center,
                 style: GoogleFonts.rubik(fontSize: 27,
                   fontWeight: FontWeight.w700,
@@ -109,7 +110,7 @@ class _AlertBody extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               Text(
-                'Distance exceeded your safety limit. Trackio is pinging the bag module at 1 Hz and fusing GPS + radio fixes to pinpoint it.',
+                l.alertBody,
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 13.5, height: 1.5, color: tk.textSecondary),
               ),
@@ -118,15 +119,15 @@ class _AlertBody extends StatelessWidget {
                 children: [
                   Expanded(
                     child: _AlertStat(
-                      label: 'LIVE DISTANCE',
-                      value: Fmt.distance(e.distance),
+                      label: l.statLiveDistance,
+                      value: l.dist(e.distance),
                       color: Semantic.danger,
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: _AlertStat(
-                      label: 'PANIC PACKETS',
+                      label: l.statPanicPackets,
                       value: '${e.panicPacketsSent}',
                       color: SmartBlue.c700,
                     ),
@@ -134,7 +135,7 @@ class _AlertBody extends StatelessWidget {
                   const SizedBox(width: 12),
                   Expanded(
                     child: _AlertStat(
-                      label: 'RADIO RETRIES',
+                      label: l.statRadioRetries,
                       value: e.connectionCut ? '${e.radioRetries}' : '—',
                       color: Semantic.warning,
                     ),
@@ -143,7 +144,7 @@ class _AlertBody extends StatelessWidget {
               ),
               const SizedBox(height: 26),
               GradientButton(
-                label: 'Open recovery map',
+                label: l.openRecoveryMap,
                 icon: Icons.map_rounded,
                 onTap: onOpenMap,
               ),
@@ -151,7 +152,7 @@ class _AlertBody extends StatelessWidget {
               OutlinedButton.icon(
                 onPressed: () => engine.markFound(),
                 icon: const Icon(Icons.verified_rounded, size: 20),
-                label: const Text('I found my bag'),
+                label: Text(l.iFoundMyBag),
               ),
             ],
           ),

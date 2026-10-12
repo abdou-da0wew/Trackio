@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../core/l10n_text.dart';
 import '../../core/palette.dart';
 import '../../core/theme.dart';
 import '../../services/settings_service.dart';
@@ -18,23 +19,23 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final _controller = PageController();
   int _page = 0;
 
-  static const _pages = [
-    (
-      Icons.radar_rounded,
-      'See your bag, always',
-      'Trackio fuses your phone GPS, the bag\'s own GPS and the ESP32 radio link into one live, continuous fix on your bag.',
-    ),
-    (
-      Icons.crisis_alert_rounded,
-      'Know the moment it leaves',
-      'Abnormal distance triggers an instant alert. Panic packets ask the bag module for high-frequency, high-accuracy fixes.',
-    ),
-    (
-      Icons.map_rounded,
-      'Get it back, fast',
-      'A guided recovery route reconciles every location source until you\'re reunited — then you confirm it with one tap.',
-    ),
-  ];
+  List<(IconData, String, String)> _pages(AppLocalizations l) => [
+        (
+          Icons.radar_rounded,
+          l.onboarding1Title,
+          l.onboarding1Body,
+        ),
+        (
+          Icons.crisis_alert_rounded,
+          l.onboarding2Title,
+          l.onboarding2Body,
+        ),
+        (
+          Icons.map_rounded,
+          l.onboarding3Title,
+          l.onboarding3Body,
+        ),
+      ];
 
   @override
   void dispose() {
@@ -50,24 +51,26 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     final tk = tkOf(context);
+    final l = l10nOf(context);
+    final pages = _pages(l);
     return Scaffold(
       body: SafeArea(
         child: Column(
           children: [
             Align(
-              alignment: Alignment.centerRight,
+              alignment: AlignmentDirectional.centerEnd,
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(22, 10, 22, 0),
-                child: TextButton(onPressed: _finish, child: const Text('Skip')),
+                child: TextButton(onPressed: _finish, child: Text(l.onboardingSkip)),
               ),
             ),
             Expanded(
               child: PageView.builder(
                 controller: _controller,
-                itemCount: _pages.length,
+                itemCount: pages.length,
                 onPageChanged: (i) => setState(() => _page = i),
                 itemBuilder: (context, i) {
-                  final (icon, title, body) = _pages[i];
+                  final (icon, title, body) = pages[i];
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 34),
                     child: Column(
@@ -122,7 +125,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   ),
                   const SizedBox(height: 26),
                   GradientButton(
-                    label: _page == 2 ? 'Get started' : 'Next',
+                    label: _page == 2 ? l.onboardingGetStarted : l.onboardingNext,
                     icon: _page == 2 ? Icons.rocket_launch_rounded : Icons.arrow_forward_rounded,
                     onTap: () {
                       if (_page == 2) {

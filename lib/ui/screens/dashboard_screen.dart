@@ -4,6 +4,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/formatters.dart';
+import '../../core/l10n_text.dart';
 import '../../core/palette.dart';
 import '../../core/theme.dart';
 import '../../models/models.dart';
@@ -23,11 +24,11 @@ class DashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tk = tkOf(context);
-    final engine = context.watch<SimulationEngine>();
+    final l = l10nOf(context);
     final auth = context.watch<AuthService>();
     final settings = context.read<SettingsService>();
     final sound = context.read<SoundService>();
-    final st = StatusTheme.of(engine.status);
+    final engine = context.read<SimulationEngine>();
 
     return Scaffold(
       body: SafeArea(
@@ -40,12 +41,12 @@ class DashboardScreen extends StatelessWidget {
               children: [
                 const TkWordmark(size: 24),
                 const Spacer(),
-                _Avatar(name: auth.user?.name ?? 'Demo User'),
+                _Avatar(name: auth.user?.name ?? l.demoUser),
               ],
             ),
             const SizedBox(height: 6),
             Text(
-              _greeting(auth.user?.name ?? 'there'),
+              _greeting(l, auth.user?.name ?? l.demoUser),
               style: GoogleFonts.rubik(fontSize: 23,
                 fontWeight: FontWeight.w700,
                 color: tk.textPrimary,
@@ -54,95 +55,18 @@ class DashboardScreen extends StatelessWidget {
             ),
             const SizedBox(height: 18),
 
-            // hero radar card
-            TkCard(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: Theme.of(context).brightness == Brightness.dark
-                    ? [tk.card, Prussian3.c200]
-                    : [Colors.white, SmartBlue.c900.withValues(alpha: .45)],
-              ),
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      StatusPill(status: engine.status, pulse: engine.inDanger || engine.status == TrackStatus.tracking),
-                      const Spacer(),
-                      Text(
-                        'updated ${Fmt.ago(engine.lastPhoneFix, DateTime.now())}',
-                        style: TextStyle(fontSize: 11.5, color: tk.textTertiary),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  SizedBox(
-                    height: 205,
-                    child: RadarView(
-                      distanceM: engine.distance,
-                      statusColor: st.color,
-                      panic: engine.inDanger,
-                    ),
-                  ),
-                  Transform.translate(
-                    offset: const Offset(0, -18),
-                    child: Column(
-                      children: [
-                        Text(
-                          Fmt.distance(engine.distance),
-                          style: GoogleFonts.rubik(fontSize: 46,
-                            height: 1,
-                            fontWeight: FontWeight.w700,
-                            color: tk.textPrimary,
-                            letterSpacing: -1.6,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          engine.connectionCut
-                              ? 'radio link down · retrying (${engine.radioRetries})'
-                              : 'from your bag · fused GPS + ESP32 radio',
-                          style: TextStyle(
-                            fontSize: 12.5,
-                            color: engine.connectionCut ? Semantic.warning : tk.textTertiary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      MetricChip(
-                        icon: Icons.battery_5_bar_rounded,
-                        label: '${engine.bag.batteryPct.round()}%',
-                        tint: engine.bag.batteryPct < 20 ? Semantic.warning : tk.textSecondary,
-                      ),
-                      MetricChip(
-                        icon: Icons.wifi_tethering_rounded,
-                        label: engine.connectionCut ? 'link lost' : Fmt.rssi(engine.bag.rssi),
-                        tint: engine.connectionCut ? Semantic.danger : null,
-                      ),
-                      MetricChip(
-                        icon: Icons.gps_fixed_rounded,
-                        label: engine.bagAccuracyM < 0 ? 'no fix' : '±${engine.bagAccuracyM.toStringAsFixed(1)} m',
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
+            // hero radar card — the only part that rebuilds every tick
+            _LiveRadarCard(engine: engine),
+
             const SizedBox(height: 18),
 
-            // quick actions
+            // quick actions (static)
             Row(
               children: [
                 Expanded(
                   child: _QuickAction(
                     icon: Icons.travel_explore_rounded,
-                    label: 'Locate bag',
+                    label: l.locateBag,
                     onTap: onGoMap,
                   ),
                 ),
@@ -150,12 +74,12 @@ class DashboardScreen extends StatelessWidget {
                 Expanded(
                   child: _QuickAction(
                     icon: Icons.notifications_active_rounded,
-                    label: 'Ring tag',
+                    label: l.ringTag,
                     onTap: () async {
                       await sound.playAlert(settings.sound);
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Playing ${settings.sound.label} on the bag module')),
+                          SnackBar(content: Text(l.playingOnBag(l.soundLabel(settings.sound)))),
                         );
                       }
                     },
@@ -165,7 +89,7 @@ class DashboardScreen extends StatelessWidget {
                 Expanded(
                   child: _QuickAction(
                     icon: Icons.science_rounded,
-                    label: 'Demo mode',
+                    label: l.demoMode,
                     onTap: onDemo,
                   ),
                 ),
@@ -175,12 +99,12 @@ class DashboardScreen extends StatelessWidget {
 
             // mini map preview
             SectionLabel(
-              'LIVE POSITION',
+              l.livePosition,
               trailing: GestureDetector(
                 onTap: onGoMap,
                 child: Row(
                   children: [
-                    Text('Open map', style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: tk.accent)),
+                    Text(l.openMap, style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: tk.accent)),
                     Icon(Icons.chevron_right_rounded, size: 17, color: tk.accent),
                   ],
                 ),
@@ -199,23 +123,159 @@ class DashboardScreen extends StatelessWidget {
             ),
             const SizedBox(height: 18),
 
-            // recent activity
-            const SectionLabel('RECENT ACTIVITY'),
-            ...engine.events.reversed.take(3).map(
-                  (e) => EventTile(event: e),
-                ),
+            // recent activity — rebuilds with the engine, isolated from the rest
+            SectionLabel(l.recentActivity),
+            _RecentEvents(engine: engine),
           ],
         ),
       ),
     );
   }
 
-  String _greeting(String name) {
+  String _greeting(AppLocalizations l, String name) {
     final h = DateTime.now().hour;
     final first = name.split(' ').first;
-    if (h < 12) return 'Good morning, $first';
-    if (h < 18) return 'Good afternoon, $first';
-    return 'Good evening, $first';
+    if (h < 12) return l.goodMorning(first);
+    if (h < 18) return l.goodAfternoon(first);
+    return l.goodEvening(first);
+  }
+}
+
+/// Hero radar card — the only dashboard section that rebuilds per engine tick.
+class _LiveRadarCard extends StatelessWidget {
+  final SimulationEngine engine;
+  const _LiveRadarCard({required this.engine});
+
+  @override
+  Widget build(BuildContext context) {
+    final l = l10nOf(context);
+    return AnimatedBuilder(
+      animation: engine,
+      builder: (context, _) {
+        final tk = tkOf(context);
+        final st = StatusTheme.of(engine.status);
+        return TkCard(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: Theme.of(context).brightness == Brightness.dark
+                ? [tk.card, Prussian3.c200]
+                : [Colors.white, SmartBlue.c900.withValues(alpha: .45)],
+          ),
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  StatusPill(status: engine.status, pulse: engine.inDanger || engine.status == TrackStatus.tracking),
+                  const Spacer(),
+                  Text(
+                    l.updatedAgo(l.ago(engine.lastPhoneFix, DateTime.now())),
+                    style: TextStyle(fontSize: 11.5, color: tk.textTertiary),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              // RepaintBoundary: the radar sweep repaints at 60 fps without
+              // touching the rest of the card / list.
+              RepaintBoundary(
+                child: SizedBox(
+                  height: 205,
+                  child: RadarView(
+                    distanceM: engine.distance,
+                    statusColor: st.color,
+                    panic: engine.inDanger,
+                  ),
+                ),
+              ),
+              Transform.translate(
+                offset: const Offset(0, -18),
+                child: Column(
+                  children: [
+                    // distance readout animates on every change
+                    AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 240),
+                      switchInCurve: Curves.easeOutCubic,
+                      switchOutCurve: Curves.easeInCubic,
+                      transitionBuilder: (child, anim) => FadeTransition(
+                        opacity: anim,
+                        child: SlideTransition(
+                          position: Tween(begin: const Offset(0, .22), end: Offset.zero).animate(anim),
+                          child: child,
+                        ),
+                      ),
+                      child: Text(
+                        l.dist(engine.distance),
+                        key: ValueKey(engine.distance.round()),
+                        style: GoogleFonts.rubik(fontSize: 46,
+                          height: 1,
+                          fontWeight: FontWeight.w700,
+                          color: tk.textPrimary,
+                          letterSpacing: -1.6,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 240),
+                      child: Text(
+                        engine.connectionCut
+                            ? l.radioLinkDown(engine.radioRetries)
+                            : l.fromYourBag,
+                        key: ValueKey(engine.connectionCut),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          color: engine.connectionCut ? Semantic.warning : tk.textTertiary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 4),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  MetricChip(
+                    icon: Icons.battery_5_bar_rounded,
+                    label: '${engine.bag.batteryPct.round()}%',
+                    tint: engine.bag.batteryPct < 20 ? Semantic.warning : tk.textSecondary,
+                  ),
+                  MetricChip(
+                    icon: Icons.wifi_tethering_rounded,
+                    label: engine.connectionCut ? l.linkLost : Fmt.rssi(engine.bag.rssi),
+                    tint: engine.connectionCut ? Semantic.danger : null,
+                  ),
+                  MetricChip(
+                    icon: Icons.gps_fixed_rounded,
+                    label: engine.bagAccuracyM < 0 ? l.noFix : '±${engine.bagAccuracyM.toStringAsFixed(1)} ${l.unitMeters}',
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// Recent-activity list — isolated rebuild, keeps the static dashboard steady.
+class _RecentEvents extends StatelessWidget {
+  final SimulationEngine engine;
+  const _RecentEvents({required this.engine});
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: engine,
+      builder: (context, _) => Column(
+        children: [
+          for (final e in engine.events.reversed.take(3)) EventTile(event: e),
+        ],
+      ),
+    );
   }
 }
 
@@ -289,37 +349,39 @@ class _MiniMap extends StatelessWidget {
       (engine.phonePos.latitude + engine.bagPos.latitude) / 2,
       (engine.phonePos.longitude + engine.bagPos.longitude) / 2,
     );
-    return AnimatedBuilder(
-      animation: engine,
-      builder: (context, _) => FlutterMap(
-        options: MapOptions(
-          initialCenter: mid,
-          initialZoom: 16.4,
-          interactionOptions: const InteractionOptions(flags: InteractiveFlag.none),
+    return RepaintBoundary(
+      child: AnimatedBuilder(
+        animation: engine,
+        builder: (context, _) => FlutterMap(
+          options: MapOptions(
+            initialCenter: mid,
+            initialZoom: 16.4,
+            interactionOptions: const InteractionOptions(flags: InteractiveFlag.none),
+          ),
+          children: [
+            TileLayer(
+              urlTemplate: url,
+              userAgentPackageName: 'app.trackio.demo',
+            ),
+            PolylineLayer(
+              polylines: [
+                Polyline(points: engine.phoneRoute.toList(), strokeWidth: 3, color: SmartBlue.c600),
+                Polyline(
+                  points: [engine.phonePos, engine.bagPos],
+                  strokeWidth: 1.6,
+                  color: Colors.white70,
+                  pattern: StrokePattern.dashed(segments: [5, 6]),
+                ),
+              ],
+            ),
+            MarkerLayer(
+              markers: [
+                PhoneDotMarker(engine.phonePos),
+                BagPinMarker(engine.bagPos, engine.status),
+              ],
+            ),
+          ],
         ),
-        children: [
-          TileLayer(
-            urlTemplate: url,
-            userAgentPackageName: 'app.trackio.demo',
-          ),
-          PolylineLayer(
-            polylines: [
-              Polyline(points: engine.phoneRoute.toList(), strokeWidth: 3, color: SmartBlue.c600),
-              Polyline(
-                points: [engine.phonePos, engine.bagPos],
-                strokeWidth: 1.6,
-                color: Colors.white70,
-                pattern: StrokePattern.dashed(segments: [5, 6]),
-              ),
-            ],
-          ),
-          MarkerLayer(
-            markers: [
-              PhoneDotMarker(engine.phonePos),
-              BagPinMarker(engine.bagPos, engine.status),
-            ],
-          ),
-        ],
       ),
     );
   }
@@ -333,6 +395,7 @@ class EventTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tk = tkOf(context);
+    final l = l10nOf(context);
     final (icon, color) = _style(event.type);
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -359,7 +422,7 @@ class EventTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  event.type.label,
+                  l.eventTypeLabel(event.type),
                   style: GoogleFonts.rubik(fontSize: 13,
                     fontWeight: FontWeight.w700,
                     color: tk.textPrimary,
@@ -367,7 +430,7 @@ class EventTile extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  event.detail,
+                  l.eventDetail(event),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(fontSize: 11.5, color: tk.textTertiary, height: 1.3),

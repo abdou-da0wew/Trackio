@@ -16,7 +16,7 @@ extension AlertSoundX on AlertSound {
       };
 }
 
-/// Persists user preferences (theme, alert sound, tracking intervals).
+/// Persists user preferences (theme, language, alert sound, tracking intervals).
 class SettingsService extends ChangeNotifier {
   SettingsService(this._prefs) {
     _themeDark = _prefs.getBool('themeDark') ?? true;
@@ -25,6 +25,7 @@ class SettingsService extends ChangeNotifier {
     _bagGpsIntervalS = _prefs.getInt('bagInterval') ?? 10;
     _recheckIntervalS = _prefs.getInt('recheckInterval') ?? 15;
     _onboardingSeen = _prefs.getBool('onboardingSeen') ?? false;
+    _localeMode = _prefs.getString('localeMode') ?? 'system';
   }
 
   final SharedPreferences _prefs;
@@ -34,6 +35,7 @@ class SettingsService extends ChangeNotifier {
   late int _bagGpsIntervalS;
   late int _recheckIntervalS;
   late bool _onboardingSeen;
+  late String _localeMode; // 'system' | 'en' | 'ar'
 
   bool get themeDark => _themeDark;
   AlertSound get sound => _sound;
@@ -41,6 +43,23 @@ class SettingsService extends ChangeNotifier {
   int get bagGpsIntervalS => _bagGpsIntervalS;
   int get recheckIntervalS => _recheckIntervalS;
   bool get onboardingSeen => _onboardingSeen;
+
+  /// In-app language preference. `system` follows the platform locale
+  /// (Flutter's standard locale resolution); `en` / `ar` override it.
+  String get localeMode => _localeMode;
+
+  /// Resolved locale for MaterialApp: null => follow the system.
+  Locale? get appLocale => switch (_localeMode) {
+        'en' => const Locale('en'),
+        'ar' => const Locale('ar'),
+        _ => null,
+      };
+
+  Future<void> setLocaleMode(String mode) async {
+    _localeMode = mode;
+    await _prefs.setString('localeMode', mode);
+    notifyListeners();
+  }
 
   ThemeMode get themeMode => _themeDark ? ThemeMode.dark : ThemeMode.light;
 

@@ -272,6 +272,20 @@ Loaded through the `google_fonts` package — the plan is locked in
   in `lib/app.dart` whenever the resolved locale is `ar`.
 - Tabular numerals for the distance readout; no text smaller than 12 px.
 
+### Localisation
+
+- **Languages:** English (`en`) and Arabic (`ar`) — official `gen_l10n`
+  pipeline, `.arb` bundles under `lib/l10n/`, iOS `CFBundleLocalizations`
+  declared.
+- **Detection & override:** the platform locale resolves against
+  `supportedLocales` per the Flutter docs; the in-app
+  *Settings → Language* control (System / English / العربية) persists and
+  overrides instantly.
+- **RTL:** full right-to-left mirroring for Arabic, including navigation and
+  map chrome; Zain replaces Rubik automatically when the locale is `ar`.
+- **Locale-free simulation:** engine events carry message codes + params;
+  localized rendering lives in `lib/core/l10n_text.dart`.
+
 ## 10. Demonstration build scope (this repository)
 
 The current deliverable is a **stakeholder demonstration**: the full product

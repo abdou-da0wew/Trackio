@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/palette.dart';
 import '../../core/theme.dart';
+import '../../core/l10n_text.dart';
 import '../widgets/common.dart';
 
 
@@ -24,6 +25,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
     final tk = tkOf(context);
+    final l = l10nOf(context);
     return Scaffold(
       backgroundColor: tk.bgDeep,
       body: Center(
@@ -61,7 +63,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
             const TkWordmark(size: 38),
             const SizedBox(height: 12),
             Text(
-              'Never lose sight of what carries your day.',
+              l.tagline,
               style: TextStyle(fontSize: 13.5, color: tk.textTertiary, letterSpacing: .2),
             ),
             const SizedBox(height: 46),

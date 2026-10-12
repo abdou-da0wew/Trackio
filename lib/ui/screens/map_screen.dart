@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../core/formatters.dart';
 import '../../core/palette.dart';
 import '../../core/theme.dart';
+import '../../core/l10n_text.dart';
 import '../../services/settings_service.dart';
 import '../../services/simulation_engine.dart';
 import '../widgets/common.dart';
@@ -34,6 +35,7 @@ class _MapScreenState extends State<MapScreen> {
   @override
   Widget build(BuildContext context) {
     final tk = tkOf(context);
+    final l = l10nOf(context);
     final engine = context.watch<SimulationEngine>();
     final settings = context.watch<SettingsService>();
     final st = StatusTheme.of(engine.status);
@@ -113,7 +115,7 @@ class _MapScreenState extends State<MapScreen> {
                         (engine.phonePos.latitude + engine.bagPos.latitude) / 2,
                         (engine.phonePos.longitude + engine.bagPos.longitude) / 2,
                       ),
-                      Fmt.distance(engine.distance),
+                      l.dist(engine.distance),
                       color: st.color,
                     ),
                     BagPinMarker(engine.bagPos, engine.status),
@@ -130,11 +132,41 @@ class _MapScreenState extends State<MapScreen> {
             ),
           ),
 
-          // top status bar
+          // top status bar (+ connection-lost error banner)
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
-              child: Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 260),
+                    child: engine.connectionCut
+                        ? Container(
+                            key: const ValueKey('linkDown'),
+                            margin: const EdgeInsets.only(top: 52),
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: Semantic.warning.withValues(alpha: .16),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: Semantic.warning.withValues(alpha: .55)),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.link_off_rounded, size: 15, color: Semantic.warning),
+                                const SizedBox(width: 7),
+                                Text(
+                                  l.mapSignalLost(engine.radioRetries),
+                                  style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600, color: Semantic.warning),
+                                ),
+                              ],
+                            ),
+                          )
+                        : const SizedBox.shrink(key: ValueKey('linkOk')),
+                  ),
+                  Row(
                 children: [
                   AnimatedBuilder(
                     animation: engine,
@@ -154,7 +186,7 @@ class _MapScreenState extends State<MapScreen> {
                           StatusPill(status: engine.status, pulse: engine.inDanger),
                           const SizedBox(width: 10),
                           Text(
-                            Fmt.distance(engine.distance),
+                            l.dist(engine.distance),
                             style: GoogleFonts.rubik(fontSize: 15,
                               fontWeight: FontWeight.w700,
                               color: tk.textPrimary,
@@ -169,8 +201,10 @@ class _MapScreenState extends State<MapScreen> {
                     icon: Icons.science_rounded,
                     bg: tk.card.withValues(alpha: .94),
                     onTap: widget.onDemo,
-                    tooltip: 'Demo controls',
+                    tooltip: l.mapTooltipDemo,
                   ),
+                ],
+              ),
                 ],
               ),
             ),
@@ -189,21 +223,21 @@ class _MapScreenState extends State<MapScreen> {
                     setState(() => _follow = true);
                     _map.move(engine.phonePos, _map.camera.zoom > 15.5 ? _map.camera.zoom : 16.4, id: 'phone');
                   },
-                  tooltip: 'Follow me',
+                  tooltip: l.tooltipFollow,
                 ),
                 const SizedBox(height: 10),
                 IconButton2(
                   icon: Icons.backpack_rounded,
                   bg: tk.card.withValues(alpha: .94),
                   onTap: () => _map.move(engine.bagPos, _map.camera.zoom > 15.5 ? _map.camera.zoom : 16.4, id: 'bag'),
-                  tooltip: 'Center on bag',
+                  tooltip: l.tooltipCenterBag,
                 ),
                 const SizedBox(height: 10),
                 IconButton2(
                   icon: Icons.fit_screen_rounded,
                   bg: tk.card.withValues(alpha: .94),
                   onTap: () => _fitBoth(engine),
-                  tooltip: 'Fit both',
+                  tooltip: l.tooltipFitBoth,
                 ),
               ],
             ),
@@ -246,8 +280,11 @@ class _MapScreenState extends State<MapScreen> {
                             const SizedBox(height: 3),
                             Text(
                               engine.connectionCut
-                                  ? 'signal lost · retry #${engine.radioRetries}'
-                                  : '±${engine.bagAccuracyM < 0 ? '—' : engine.bagAccuracyM.toStringAsFixed(1)} m fix · ${Fmt.rssi(b.rssi)} · battery ${b.batteryPct.round()}%',
+                                  ? l.mapSignalLost(engine.radioRetries)
+                                  : l.bagFixLine(
+                                      engine.bagAccuracyM < 0 ? '—' : engine.bagAccuracyM.toStringAsFixed(1),
+                                      Fmt.rssi(b.rssi),
+                                      b.batteryPct.round()),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(fontSize: 11.5, color: tk.textTertiary),
@@ -260,9 +297,9 @@ class _MapScreenState extends State<MapScreen> {
                         icon: Icons.notifications_active_rounded,
                         fg: tk.accent,
                         onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Buzz command queued on ESP32 module')),
+                          SnackBar(content: Text(l.buzzQueued)),
                         ),
-                        tooltip: 'Ring tag',
+                        tooltip: l.ringTag,
                       ),
                     ],
                   );

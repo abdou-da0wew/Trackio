@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -11,6 +12,10 @@ import 'services/sound_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // All three typefaces (Rubik / Jaro / Zain) are bundled under
+  // assets/google_fonts/ — never fetch over the network at runtime.
+  GoogleFonts.config.allowRuntimeFetching = false;
 
   final prefs = await SharedPreferences.getInstance();
   final settings = SettingsService(prefs);

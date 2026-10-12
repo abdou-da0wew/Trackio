@@ -42,8 +42,19 @@ extension TrackEventTypeX on TrackEventType {
 class TrackEvent {
   final DateTime time;
   final TrackEventType type;
-  final String detail;
-  TrackEvent({required this.time, required this.type, required this.detail});
+
+  /// Machine-readable message code, rendered through AppLocalizations
+  /// (see `core/l10n_text.dart`). Keeps the engine locale-free.
+  final String code;
+
+  /// Typed parameters for the localized message.
+  final Map<String, Object> params;
+  TrackEvent({
+    required this.time,
+    required this.type,
+    required this.code,
+    this.params = const {},
+  });
 }
 
 class GpsFix {

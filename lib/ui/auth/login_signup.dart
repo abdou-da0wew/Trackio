@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../core/l10n_text.dart';
 import '../../core/palette.dart';
 import '../../core/theme.dart';
 import '../../services/mock_auth_service.dart';
@@ -18,16 +19,23 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _busy = false;
 
   Future<void> _submit() async {
+    final email = _email.text.trim();
+    if (email.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10nOf(context).errEnterEmail)),
+      );
+      return;
+    }
     setState(() => _busy = true);
     final auth = context.read<AuthService>();
-    final ok = await auth.login(email: _email.text);
+    final ok = await auth.login(email: email);
     if (!mounted) return;
     if (ok) {
       Navigator.pushNamedAndRemoveUntil(context, '/shell', (_) => false);
     } else {
       setState(() => _busy = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Enter an email to continue the demo')),
+        SnackBar(content: Text(l10nOf(context).errEnterEmail)),
       );
     }
   }
@@ -35,6 +43,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final tk = tkOf(context);
+    final l = l10nOf(context);
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -46,7 +55,7 @@ class _LoginScreenState extends State<LoginScreen> {
               const Align(child: TkWordmark(size: 30)),
               const SizedBox(height: 44),
               Text(
-                'Welcome back',
+                l.loginWelcomeBack,
                 style: GoogleFonts.rubik(fontSize: 30,
                   fontWeight: FontWeight.w700,
                   color: tk.textPrimary,
@@ -55,7 +64,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Sign in to keep your bag within reach.',
+                l.loginSubtitle,
                 style: TextStyle(fontSize: 14.5, color: tk.textSecondary),
               ),
               const SizedBox(height: 34),
@@ -78,15 +87,15 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 10),
               Align(
-                alignment: Alignment.centerRight,
+                alignment: AlignmentDirectional.centerEnd,
                 child: TextButton(
                   onPressed: () {},
-                  child: const Text('Forgot password?'),
+                  child: Text(l.forgotPassword),
                 ),
               ),
               const SizedBox(height: 12),
               GradientButton(
-                label: _busy ? 'Signing in…' : 'Sign in',
+                label: _busy ? l.signingIn : l.signIn,
                 icon: Icons.login_rounded,
                 onTap: _busy ? null : _submit,
               ),
@@ -95,13 +104,13 @@ class _LoginScreenState extends State<LoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    'New to Trackio? ',
+                    l.newToTrackio,
                     style: TextStyle(color: tk.textSecondary, fontSize: 13.5),
                   ),
                   GestureDetector(
                     onTap: () => Navigator.pushNamed(context, '/signup'),
                     child: Text(
-                      'Create an account',
+                      l.createAccount,
                       style: TextStyle(
                         color: tk.accent,
                         fontSize: 13.5,
@@ -112,7 +121,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ],
               ),
               const SizedBox(height: 30),
-              _DemoBanner(text: 'Demo build — any credentials sign you in.'),
+              _DemoBanner(text: l.demoLoginBanner),
             ],
           ),
         ),
@@ -165,7 +174,7 @@ class _SignupScreenState extends State<SignupScreen> {
   Future<void> _submit() async {
     if (_name.text.trim().isEmpty || _email.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Fill your name and email to continue')),
+        SnackBar(content: Text(l10nOf(context).errFillNameEmail)),
       );
       return;
     }
@@ -181,6 +190,7 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   Widget build(BuildContext context) {
     final tk = tkOf(context);
+    final l = l10nOf(context);
     return Scaffold(
       appBar: AppBar(leading: const BackButton()),
       body: SafeArea(
@@ -191,7 +201,7 @@ class _SignupScreenState extends State<SignupScreen> {
             children: [
               const SizedBox(height: 10),
               Text(
-                'Create your account',
+                l.signupTitle,
                 style: GoogleFonts.rubik(fontSize: 28,
                   fontWeight: FontWeight.w700,
                   color: tk.textPrimary,
@@ -200,7 +210,7 @@ class _SignupScreenState extends State<SignupScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                'One account for every bag you track.',
+                l.signupSubtitle,
                 style: TextStyle(fontSize: 14.5, color: tk.textSecondary),
               ),
               const SizedBox(height: 32),
@@ -231,12 +241,12 @@ class _SignupScreenState extends State<SignupScreen> {
               ),
               const SizedBox(height: 22),
               GradientButton(
-                label: _busy ? 'Creating…' : 'Continue',
+                label: _busy ? l.creating : l.continueLabel,
                 icon: Icons.arrow_forward_rounded,
                 onTap: _busy ? null : _submit,
               ),
               const SizedBox(height: 26),
-              _DemoBanner(text: 'Demo build — signup generates a mock OTP shown on the next screen.'),
+              _DemoBanner(text: l.demoSignupBanner),
             ],
           ),
         ),

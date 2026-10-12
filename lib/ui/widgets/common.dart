@@ -1,24 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/fonts.dart';
+import '../../core/l10n_text.dart';
 import '../../core/palette.dart';
 import '../../core/theme.dart';
 import '../../models/models.dart';
 
-/// Status → color / label / icon mapping used everywhere.
+/// Status → color / icon mapping used everywhere.
+/// (Labels are localized — see `AppLocalizationsX.statusLabel`.)
 class StatusTheme {
   final Color color;
-  final String label;
   final IconData icon;
-  const StatusTheme(this.color, this.label, this.icon);
+  const StatusTheme(this.color, this.icon);
 
   static StatusTheme of(TrackStatus s) => switch (s) {
-        TrackStatus.tracking => const StatusTheme(SmartBlue.c600, 'TRACKING', Icons.radar_rounded),
-        TrackStatus.warning => const StatusTheme(Semantic.warning, 'DISTANCE WARNING', Icons.warning_amber_rounded),
-        TrackStatus.lost => const StatusTheme(Semantic.danger, 'POSSIBLY LOST', Icons.location_off_rounded),
-        TrackStatus.panic => const StatusTheme(Semantic.danger, 'PANIC MODE', Icons.crisis_alert_rounded),
-        TrackStatus.recovering => const StatusTheme(Sapphire.c700, 'RECOVERING', Icons.navigation_rounded),
-        TrackStatus.found => const StatusTheme(Semantic.success, 'RECOVERED', Icons.verified_rounded),
+        TrackStatus.tracking => const StatusTheme(SmartBlue.c600, Icons.radar_rounded),
+        TrackStatus.warning => const StatusTheme(Semantic.warning, Icons.warning_amber_rounded),
+        TrackStatus.lost => const StatusTheme(Semantic.danger, Icons.location_off_rounded),
+        TrackStatus.panic => const StatusTheme(Semantic.danger, Icons.crisis_alert_rounded),
+        TrackStatus.recovering => const StatusTheme(Sapphire.c700, Icons.navigation_rounded),
+        TrackStatus.found => const StatusTheme(Semantic.success, Icons.verified_rounded),
       };
 }
 
@@ -79,7 +80,9 @@ class StatusPill extends StatelessWidget {
     return _Pulsing(
       active: pulse,
       color: st.color,
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 280),
+        curve: Curves.easeOut,
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
         decoration: BoxDecoration(
           color: st.color.withValues(alpha: .14),
@@ -96,7 +99,7 @@ class StatusPill extends StatelessWidget {
             ),
             const SizedBox(width: 7),
             Text(
-              st.label,
+              l10nOf(context).statusLabel(status),
               style: GoogleFonts.rubik(fontSize: 11.5,
                 fontWeight: FontWeight.w700,
                 letterSpacing: .8,
@@ -262,44 +265,46 @@ class GradientButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tk = tkOf(context);
-    return Opacity(
-      opacity: onTap == null ? .55 : 1,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(colors: tk.ctaGradient),
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: tk.accent.withValues(alpha: .35),
-              blurRadius: 18,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        child: SizedBox(
-          height: height,
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: onTap,
-              borderRadius: BorderRadius.circular(16),
-              child: Center(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (icon != null) ...[
-                      Icon(icon, size: 20, color: tk.onAccent),
-                      const SizedBox(width: 10),
-                    ],
-                    Text(
-                      label,
-                      style: GoogleFonts.rubik(fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: tk.onAccent,
-                        letterSpacing: .2,
+    return _PressScale(
+      child: Opacity(
+        opacity: onTap == null ? .55 : 1,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(colors: tk.ctaGradient),
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: tk.accent.withValues(alpha: .35),
+                blurRadius: 18,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: SizedBox(
+            height: height,
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: onTap,
+                borderRadius: BorderRadius.circular(16),
+                child: Center(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (icon != null) ...[
+                        Icon(icon, size: 20, color: tk.onAccent),
+                        const SizedBox(width: 10),
+                      ],
+                      Text(
+                        label,
+                        style: GoogleFonts.rubik(fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: tk.onAccent,
+                          letterSpacing: .2,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -322,20 +327,48 @@ class IconButton2 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tk = tkOf(context);
-    final b = Material(
-      color: bg ?? tk.card,
-      borderRadius: BorderRadius.circular(14),
-      child: InkWell(
-        onTap: onTap,
+    final b = _PressScale(
+      child: Material(
+        color: bg ?? tk.card,
         borderRadius: BorderRadius.circular(14),
-        child: SizedBox(
-          width: 46,
-          height: 46,
-          child: Icon(icon, size: 21, color: fg ?? tk.textPrimary),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(14),
+          child: SizedBox(
+            width: 46,
+            height: 46,
+            child: Icon(icon, size: 21, color: fg ?? tk.textPrimary),
+          ),
         ),
       ),
     );
     if (tooltip == null) return b;
     return Tooltip(message: tooltip!, child: b);
+  }
+}
+
+/// Subtle press-down scale feedback shared by buttons and icon buttons.
+class _PressScale extends StatefulWidget {
+  final Widget child;
+  const _PressScale({required this.child});
+  @override
+  State<_PressScale> createState() => _PressScaleState();
+}
+
+class _PressScaleState extends State<_PressScale> {
+  bool _down = false;
+  @override
+  Widget build(BuildContext context) {
+    return Listener(
+      onPointerDown: (_) => setState(() => _down = true),
+      onPointerUp: (_) => setState(() => _down = false),
+      onPointerCancel: (_) => setState(() => _down = false),
+      child: AnimatedScale(
+        scale: _down ? .96 : 1,
+        duration: const Duration(milliseconds: 110),
+        curve: Curves.easeOut,
+        child: widget.child,
+      ),
+    );
   }
 }

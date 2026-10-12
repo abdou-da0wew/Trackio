@@ -11,6 +11,7 @@
 [![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?style=flat-square&logo=flutter&logoColor=white)](https://flutter.dev)
 [![Dart](https://img.shields.io/badge/Dart-3.x-0175C2?style=flat-square&logo=dart&logoColor=white)](https://dart.dev)
 [![Platform](https://img.shields.io/badge/platform-Android_%7C_iOS_%7C_Web-001233?style=flat-square)](#quick-start)
+[![Languages](https://img.shields.io/badge/languages-English_%7C_%D8%A7%D9%84%D8%B9%D8%B1%D8%A8%D9%8A%D8%A9-0052eb?style=flat-square)](#languages)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-2da78f?style=flat-square)](CONTRIBUTING.md)
 [![MIT license](https://img.shields.io/badge/license-MIT-0052eb?style=flat-square)](LICENSE)
 [![Demo mode](https://img.shields.io/badge/demo-movie_mode-0052eb?style=flat-square)](docs/DEMO_GUIDE.md)
@@ -129,6 +130,27 @@ Honest about the seams — that's what makes the demo trustworthy:
 | Auth (signup → OTP → session) | 🔶 mock service, identical contract | `supabase_flutter` drop-in |
 | Cloud sync (Supabase + Tigris on VDS) | 🔶 represented in UI | self-hosted stack per the [PRD](docs/PRD.md) |
 
+## Languages
+
+**English and Arabic, end to end.** Localization follows Flutter's official
+`gen_l10n` pipeline (`l10n.yaml` + `.arb` bundles in [`lib/l10n/`](lib/l10n)):
+
+- **Language detection** — the platform/browser locale list resolves against
+  the supported locales (`en`, `ar`), exactly as documented in the Flutter
+  internationalization guide.
+- **In-app switch** — *Settings → Language* offers **System / English /
+  العربية**; the choice persists and overrides the system instantly.
+- **Full RTL** — the whole layout mirrors automatically for Arabic, including
+  navigation, cards, charts and the map chrome.
+- **Typeface plan** — Rubik for English, Zain for Arabic (applied
+  automatically when the resolved locale is `ar`), Jaro reserved for the
+  logo. All three are **bundled as assets**, so nothing is fetched from the
+  network at runtime — the demo renders identically offline.
+- **Even the simulation speaks** — engine events and demo captions are
+  locale-free codes resolved to localized text in the UI layer
+  (`lib/core/l10n_text.dart`), so the event log and movie-mode captions are
+  fully translated.
+
 ## Screenshots
 
 | | | |
@@ -138,9 +160,11 @@ Honest about the seams — that's what makes the demo trustworthy:
 | ![Alert — panic](docs/screenshots/07-alert-panic.png) | ![Map — panic](docs/screenshots/09-map-panic.png) | ![History](docs/screenshots/10-history.png) |
 | *Lost-bag alert + panic mode* | *Panic pulses on last-known pin* | *Distance timeline & event log* |
 | ![Home — found](docs/screenshots/12-home-found.png) | ![Settings](docs/screenshots/11-settings.png) | ![Home — light](docs/screenshots/15-home-light.png) |
-| *Recovered & confirmed* | *Sounds, intervals, account* | *Light theme* |
+| *Recovered & confirmed* | *Language, sounds, intervals* | *Light theme* |
+| ![Arabic — RTL](docs/screenshots/16-arabic-dashboard.png) | | |
+| *Arabic UI — full RTL, Zain typeface* | | |
 
-Full gallery (15 shots, both themes): [`docs/screenshots/`](docs/screenshots).
+Full gallery (16 shots, both themes + Arabic RTL): [`docs/screenshots/`](docs/screenshots).
 
 ## FAQ
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../core/l10n_text.dart';
 import '../../core/palette.dart';
 import '../../core/theme.dart';
 import '../../services/mock_auth_service.dart';
@@ -15,32 +16,33 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tk = tkOf(context);
+    final l = l10nOf(context);
     final settings = context.watch<SettingsService>();
     final sound = context.read<SoundService>();
     final auth = context.watch<AuthService>();
     final engine = context.watch<SimulationEngine>();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
+      appBar: AppBar(title: Text(l.settingsTitle)),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 6, 20, 30),
         children: [
           // ── appearance ──
-          const SectionLabel('APPEARANCE'),
+          SectionLabel(l.sectionAppearance),
           TkCard(
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
                 _ThemeOption(
                   icon: Icons.dark_mode_rounded,
-                  label: 'Dark',
+                  label: l.themeDark,
                   selected: settings.themeDark,
                   onTap: () => settings.setThemeDark(true),
                 ),
                 const SizedBox(width: 12),
                 _ThemeOption(
                   icon: Icons.light_mode_rounded,
-                  label: 'Light',
+                  label: l.themeLight,
                   selected: !settings.themeDark,
                   onTap: () => settings.setThemeDark(false),
                 ),
@@ -49,8 +51,25 @@ class SettingsScreen extends StatelessWidget {
           ),
           const SizedBox(height: 22),
 
+          // ── language ──
+          SectionLabel(l.sectionLanguage),
+          TkCard(
+            padding: const EdgeInsets.all(16),
+            child: SegmentedButton<String>(
+              segments: [
+                ButtonSegment(value: 'system', icon: const Icon(Icons.language_rounded, size: 17), label: Text(l.langSystem)),
+                ButtonSegment(value: 'en', label: Text(l.langEnglish)),
+                ButtonSegment(value: 'ar', label: Text(l.langArabic)),
+              ],
+              selected: {settings.localeMode},
+              onSelectionChanged: (s) => settings.setLocaleMode(s.first),
+              showSelectedIcon: false,
+            ),
+          ),
+          const SizedBox(height: 22),
+
           // ── alert sound ──
-          const SectionLabel('LOST-BAG ALERT SOUND'),
+          SectionLabel(l.sectionSound),
           TkCard(
             padding: const EdgeInsets.symmetric(vertical: 6),
             child: RadioGroup<AlertSound>(
@@ -71,7 +90,7 @@ class SettingsScreen extends StatelessWidget {
                       color: settings.sound == s ? tk.accent : tk.textTertiary,
                     ),
                     title: Text(
-                      s.label,
+                      l.soundLabel(s),
                       style: GoogleFonts.rubik(fontSize: 14,
                         fontWeight: FontWeight.w600,
                         color: settings.sound == s ? tk.textPrimary : tk.textSecondary,
@@ -84,7 +103,7 @@ class SettingsScreen extends StatelessWidget {
                           icon: Icon(Icons.play_circle_fill_rounded,
                               size: 24, color: tk.accent),
                           onPressed: () => sound.playAlert(s),
-                          tooltip: 'Preview',
+                          tooltip: l.soundPreview,
                         ),
                         Radio<AlertSound>(value: s),
                       ],
@@ -98,27 +117,27 @@ class SettingsScreen extends StatelessWidget {
           const SizedBox(height: 22),
 
           // ── intervals ──
-          const SectionLabel('TRACKING & GPS INTERVALS'),
+          SectionLabel(l.sectionIntervals),
           TkCard(
             padding: const EdgeInsets.fromLTRB(18, 14, 18, 8),
             child: Column(
               children: [
                 _IntervalSlider(
-                  label: 'Phone GPS update',
+                  label: l.intervalPhoneGps,
                   value: settings.phoneGpsIntervalS,
                   min: 2,
                   max: 15,
                   onChanged: settings.setPhoneInterval,
                 ),
                 _IntervalSlider(
-                  label: 'Bag GPS update',
+                  label: l.intervalBagGps,
                   value: settings.bagGpsIntervalS,
                   min: 5,
                   max: 30,
                   onChanged: settings.setBagInterval,
                 ),
                 _IntervalSlider(
-                  label: 'Distance recheck',
+                  label: l.intervalRecheck,
                   value: settings.recheckIntervalS,
                   min: 10,
                   max: 60,
@@ -127,7 +146,7 @@ class SettingsScreen extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(top: 4, bottom: 10),
                   child: Text(
-                    'Panic mode overrides these: the bag module switches to 1 Hz fixes until you confirm recovery.',
+                    l.intervalsNote,
                     style: TextStyle(fontSize: 11.5, color: tk.textTertiary, height: 1.45),
                   ),
                 ),
@@ -137,7 +156,7 @@ class SettingsScreen extends StatelessWidget {
           const SizedBox(height: 22),
 
           // ── backend ──
-          const SectionLabel('CONNECTION'),
+          SectionLabel(l.sectionConnection),
           TkCard(
             padding: const EdgeInsets.symmetric(vertical: 6),
             child: Column(
@@ -145,32 +164,32 @@ class SettingsScreen extends StatelessWidget {
                 ListTile(
                   leading: const Icon(Icons.storage_rounded),
                   title: Text(
-                    'Supabase · self-hosted VDS',
+                    l.backendSupabase,
                     style: GoogleFonts.rubik(fontSize: 13.5,
                       fontWeight: FontWeight.w600,
                       color: tk.textPrimary,
                     ),
                   ),
                   subtitle: Text(
-                    engine.scenarioRunning ? 'syncing events · demo' : 'auth + tracking sync',
+                    engine.scenarioRunning ? l.supabaseSyncing : l.supabaseAuth,
                     style: TextStyle(fontSize: 11.5, color: tk.textTertiary),
                   ),
-                  trailing: const _StatusDot(ok: true),
+                  trailing: _StatusDot(ok: true, label: l.connected, downLabel: l.down),
                 ),
                 ListTile(
                   leading: const Icon(Icons.cloud_done_rounded),
                   title: Text(
-                    'Tigris object storage',
+                    l.backendTigris,
                     style: GoogleFonts.rubik(fontSize: 13.5,
                       fontWeight: FontWeight.w600,
                       color: tk.textPrimary,
                     ),
                   ),
                   subtitle: Text(
-                    'route archives & exports',
+                    l.tigrisSubtitle,
                     style: TextStyle(fontSize: 11.5, color: tk.textTertiary),
                   ),
-                  trailing: const _StatusDot(ok: true),
+                  trailing: _StatusDot(ok: true, label: l.connected, downLabel: l.down),
                 ),
               ],
             ),
@@ -178,7 +197,7 @@ class SettingsScreen extends StatelessWidget {
           const SizedBox(height: 22),
 
           // ── account ──
-          const SectionLabel('ACCOUNT'),
+          SectionLabel(l.sectionAccount),
           TkCard(
             padding: const EdgeInsets.all(16),
             child: Row(
@@ -205,7 +224,7 @@ class SettingsScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        auth.user?.name ?? 'Trackio User',
+                        auth.user?.name ?? l.demoUser,
                         style: GoogleFonts.rubik(fontSize: 14.5,
                           fontWeight: FontWeight.w700,
                           color: tk.textPrimary,
@@ -220,15 +239,12 @@ class SettingsScreen extends StatelessWidget {
                   ),
                 ),
                 OutlinedButton(
-                  onPressed: () {
-                    context.read<AuthService>().signOut();
-                    Navigator.pushNamedAndRemoveUntil(context, '/login', (_) => false);
-                  },
+                  onPressed: () => _confirmSignOut(context),
                   style: OutlinedButton.styleFrom(
                     minimumSize: const Size(0, 40),
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                   ),
-                  child: const Text('Sign out'),
+                  child: Text(l.signOut),
                 ),
               ],
             ),
@@ -236,9 +252,32 @@ class SettingsScreen extends StatelessWidget {
           const SizedBox(height: 26),
           Center(
             child: Text(
-              'Trackio 1.0.0 · demo build for stakeholder preview',
+              l.versionLine,
               style: TextStyle(fontSize: 11.5, color: tk.textTertiary),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Confirmation state before signing out — no accidental logouts mid-demo.
+  void _confirmSignOut(BuildContext context) {
+    final l = l10nOf(context);
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l.signOutTitle),
+        content: Text(l.signOutBody),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l.cancel)),
+          FilledButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              context.read<AuthService>().signOut();
+              Navigator.pushNamedAndRemoveUntil(context, '/login', (_) => false);
+            },
+            child: Text(l.confirm),
           ),
         ],
       ),
@@ -313,15 +352,17 @@ class _IntervalSlider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tk = tkOf(context);
+    final l = l10nOf(context);
     return Column(
       children: [
         Row(
           children: [
-            Text(
-              label,
-              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: tk.textSecondary),
+            Expanded(
+              child: Text(
+                label,
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: tk.textSecondary),
+              ),
             ),
-            const Spacer(),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
               decoration: BoxDecoration(
@@ -329,7 +370,7 @@ class _IntervalSlider extends StatelessWidget {
                 borderRadius: BorderRadius.circular(9),
               ),
               child: Text(
-                '${value}s',
+                l.intervalSeconds(value),
                 style: GoogleFonts.rubik(fontSize: 12,
                   fontWeight: FontWeight.w700,
                   color: tk.accent,
@@ -343,7 +384,7 @@ class _IntervalSlider extends StatelessWidget {
           min: min,
           max: max,
           divisions: (max - min).round(),
-          label: '${value}s',
+          label: l.intervalSeconds(value),
           onChanged: (v) => onChanged(v.round()),
         ),
       ],
@@ -353,7 +394,9 @@ class _IntervalSlider extends StatelessWidget {
 
 class _StatusDot extends StatelessWidget {
   final bool ok;
-  const _StatusDot({required this.ok});
+  final String label;
+  final String downLabel;
+  const _StatusDot({required this.ok, required this.label, required this.downLabel});
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -370,7 +413,7 @@ class _StatusDot extends StatelessWidget {
         ),
         const SizedBox(width: 6),
         Text(
-          ok ? 'Connected' : 'Down',
+          ok ? label : downLabel,
           style: TextStyle(fontSize: 11.5, color: tkOf(context).textTertiary),
         ),
       ],

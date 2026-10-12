@@ -17,14 +17,47 @@ semantic versioning.
 
 ## [Unreleased]
 
+### Added
+
+- **Full Arabic localization (RTL)** via Flutter's official `gen_l10n`
+  pipeline: `l10n.yaml`, `.arb` bundles in `lib/l10n/`, generated
+  `AppLocalizations` wired into `MaterialApp` with `supportedLocales: [en, ar]`
+  and iOS `CFBundleLocalizations`. Every screen, setting, event-log entry and
+  demo caption is translated; the layout mirrors automatically in RTL.
+- **In-app language switcher** — *Settings → Language* (System / English /
+  العربية), persisted and applied instantly; `system` follows the platform
+  locale per the Flutter internationalization docs.
+- **New Arabic dashboard screenshot** (`16-arabic-dashboard.png`) in the
+  gallery.
+
 ### Changed
 
 - **Typefaces moved to Google Fonts** via the `google_fonts` package, with a
   locked three-face plan (`lib/core/fonts.dart`): **Rubik** for all English
   UI text (headings, body, numerals — variable 300–900, true weights),
   **Jaro** reserved for the logo wordmark and stylised brand moments, and
-  **Zain** applied automatically when the locale is Arabic (`ar`). The
-  bundled Space Grotesk / Inter assets were removed.
+  **Zain** applied automatically when the locale is Arabic (`ar`).
+- **Fonts bundled as assets** — the exact pinned TTFs (Rubik ×4, Zain ×6,
+  Jaro ×1) live under `assets/google_fonts/` and
+  `GoogleFonts.config.allowRuntimeFetching = false`, so the app renders
+  identically offline with zero font flash.
+- **Simulation layer made locale-free** — `TrackEvent` now carries a message
+  code + typed params (rendered by `core/l10n_text.dart`); scenario captions
+  resolve from the machine-readable phase, keeping the engine reusable for
+  future locales.
+
+### Performance & polish
+
+- Shell no longer rebuilds the whole tab tree on every engine tick — sound
+  hooks moved to an engine listener; only the caption HUD and alert overlay
+  listen to the simulation.
+- Dashboard narrowed: the hero radar card and recent-activity list rebuild
+  per tick, the rest of the screen is static; `RepaintBoundary` around the
+  radar sweep, mini-map and panic rings.
+- Micro-interactions: press-scale on buttons, animated distance readout,
+  animated status pill, OTP shake on wrong code.
+- New states: sign-out confirmation dialog, "bag recovered" toast, map
+  connection-lost banner, localized empty/error states.
 
 ## [1.0.0] — Stakeholder demonstration build
 
