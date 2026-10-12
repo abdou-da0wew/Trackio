@@ -59,7 +59,7 @@ class AuthService extends ChangeNotifier {
 
   Future<bool> login({required String email}) async {
     if (email.trim().isEmpty) return false;
-    _user = AppUser(name: _prefs.getString('demo_user_name') ?? 'Ahmed Hassan', email: email);
+    _user = AppUser(name: _prefs.getString('demo_user_name') ?? 'Abdou', email: email);
     await _prefs.setString('demo_user_name', _user!.name);
     await _prefs.setString('demo_user_email', email);
     notifyListeners();
