@@ -1,0 +1,359 @@
+import 'package:flutter/material.dart';
+import '../../core/palette.dart';
+import '../../core/theme.dart';
+import '../../models/models.dart';
+
+/// Status → color / label / icon mapping used everywhere.
+class StatusTheme {
+  final Color color;
+  final String label;
+  final IconData icon;
+  const StatusTheme(this.color, this.label, this.icon);
+
+  static StatusTheme of(TrackStatus s) => switch (s) {
+        TrackStatus.tracking => const StatusTheme(SmartBlue.c600, 'TRACKING', Icons.radar_rounded),
+        TrackStatus.warning => const StatusTheme(Semantic.warning, 'DISTANCE WARNING', Icons.warning_amber_rounded),
+        TrackStatus.lost => const StatusTheme(Semantic.danger, 'POSSIBLY LOST', Icons.location_off_rounded),
+        TrackStatus.panic => const StatusTheme(Semantic.danger, 'PANIC MODE', Icons.crisis_alert_rounded),
+        TrackStatus.recovering => const StatusTheme(Sapphire.c700, 'RECOVERING', Icons.navigation_rounded),
+        TrackStatus.found => const StatusTheme(Semantic.success, 'RECOVERED', Icons.verified_rounded),
+      };
+}
+
+/// Trackio wordmark: radar glyph + display type.
+class TkWordmark extends StatelessWidget {
+  final double size;
+  final Color? color;
+  const TkWordmark({super.key, this.size = 26, this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    final tk = tkOf(context);
+    final c = color ?? tk.textPrimary;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: size + 8,
+          height: size + 8,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: tk.ctaGradient,
+            ),
+            borderRadius: BorderRadius.circular(size * .38),
+          ),
+          child: Icon(Icons.radar_rounded, color: Colors.white, size: size * .72),
+        ),
+        SizedBox(width: size * .34),
+        RichText(
+          text: TextSpan(
+            children: [
+              TextSpan(
+                text: 'Track',
+                style: TextStyle(
+                  fontFamily: 'SpaceGrotesk',
+                  fontSize: size,
+                  fontWeight: FontWeight.w700,
+                  color: c,
+                  letterSpacing: -.5,
+                ),
+              ),
+              TextSpan(
+                text: 'io',
+                style: TextStyle(
+                  fontFamily: 'SpaceGrotesk',
+                  fontSize: size,
+                  fontWeight: FontWeight.w700,
+                  color: tk.accent,
+                  letterSpacing: -.5,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class StatusPill extends StatelessWidget {
+  final TrackStatus status;
+  final bool pulse;
+  const StatusPill({super.key, required this.status, this.pulse = false});
+
+  @override
+  Widget build(BuildContext context) {
+    final st = StatusTheme.of(status);
+    return _Pulsing(
+      active: pulse,
+      color: st.color,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+        decoration: BoxDecoration(
+          color: st.color.withValues(alpha: .14),
+          borderRadius: BorderRadius.circular(30),
+          border: Border.all(color: st.color.withValues(alpha: .45)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 7,
+              height: 7,
+              decoration: BoxDecoration(color: st.color, shape: BoxShape.circle),
+            ),
+            const SizedBox(width: 7),
+            Text(
+              st.label,
+              style: TextStyle(
+                fontFamily: 'SpaceGrotesk',
+                fontSize: 11.5,
+                fontWeight: FontWeight.w700,
+                letterSpacing: .8,
+                color: st.color,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Pulsing extends StatefulWidget {
+  final bool active;
+  final Color color;
+  final Widget child;
+  const _Pulsing({required this.active, required this.color, required this.child});
+  @override
+  State<_Pulsing> createState() => _PulsingState();
+}
+
+class _PulsingState extends State<_Pulsing> with SingleTickerProviderStateMixin {
+  late final AnimationController _c =
+      AnimationController(vsync: this, duration: const Duration(milliseconds: 1400))..repeat(reverse: true);
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+  @override
+  Widget build(BuildContext context) {
+    if (!widget.active) return widget.child;
+    return AnimatedBuilder(
+      animation: _c,
+      builder: (_, _) => DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(30),
+          boxShadow: [
+            BoxShadow(
+              color: widget.color.withValues(alpha: .35 * _c.value),
+              blurRadius: 14,
+              spreadRadius: 1,
+            ),
+          ],
+        ),
+        child: widget.child,
+      ),
+    );
+  }
+}
+
+class MetricChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color? tint;
+  const MetricChip({super.key, required this.icon, required this.label, this.tint});
+
+  @override
+  Widget build(BuildContext context) {
+    final tk = tkOf(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: tk.bgDeep.withValues(alpha: .55),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: tint ?? tk.textSecondary),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: TextStyle(
+              fontFamily: 'SpaceGrotesk',
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: tk.textSecondary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class SectionLabel extends StatelessWidget {
+  final String text;
+  final Widget? trailing;
+  const SectionLabel(this.text, {super.key, this.trailing});
+
+  @override
+  Widget build(BuildContext context) {
+    final tk = tkOf(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          Text(
+            text.toUpperCase(),
+            style: TextStyle(
+              fontFamily: 'SpaceGrotesk',
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1.6,
+              color: tk.textTertiary,
+            ),
+          ),
+          const Spacer(),
+          ?trailing
+        ],
+      ),
+    );
+  }
+}
+
+/// Soft-elevation card used across screens.
+class TkCard extends StatelessWidget {
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+  final Gradient? gradient;
+  final Color? color;
+  final double radius;
+  final VoidCallback? onTap;
+  const TkCard({
+    super.key,
+    required this.child,
+    this.padding = const EdgeInsets.all(18),
+    this.gradient,
+    this.color,
+    this.radius = 22,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final tk = tkOf(context);
+    return Material(
+      color: color ?? tk.card,
+      borderRadius: BorderRadius.circular(radius),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(radius),
+        child: Ink(
+          decoration: BoxDecoration(
+            gradient: gradient,
+            color: gradient == null ? (color ?? tk.card) : null,
+            borderRadius: BorderRadius.circular(radius),
+            border: Border.all(color: tk.stroke.withValues(alpha: .7)),
+          ),
+          child: Padding(padding: padding, child: child),
+        ),
+      ),
+    );
+  }
+}
+
+/// Solid gradient CTA button.
+class GradientButton extends StatelessWidget {
+  final String label;
+  final IconData? icon;
+  final VoidCallback? onTap;
+  final double height;
+  const GradientButton({super.key, required this.label, this.icon, this.onTap, this.height = 54});
+
+  @override
+  Widget build(BuildContext context) {
+    final tk = tkOf(context);
+    return Opacity(
+      opacity: onTap == null ? .55 : 1,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(colors: tk.ctaGradient),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: tk.accent.withValues(alpha: .35),
+              blurRadius: 18,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: SizedBox(
+          height: height,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: onTap,
+              borderRadius: BorderRadius.circular(16),
+              child: Center(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (icon != null) ...[
+                      Icon(icon, size: 20, color: tk.onAccent),
+                      const SizedBox(width: 10),
+                    ],
+                    Text(
+                      label,
+                      style: TextStyle(
+                        fontFamily: 'SpaceGrotesk',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: tk.onAccent,
+                        letterSpacing: .2,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Squared icon action button (map controls, quick actions).
+class IconButton2 extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback? onTap;
+  final Color? bg;
+  final Color? fg;
+  final String? tooltip;
+  const IconButton2({super.key, required this.icon, this.onTap, this.bg, this.fg, this.tooltip});
+
+  @override
+  Widget build(BuildContext context) {
+    final tk = tkOf(context);
+    final b = Material(
+      color: bg ?? tk.card,
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: SizedBox(
+          width: 46,
+          height: 46,
+          child: Icon(icon, size: 21, color: fg ?? tk.textPrimary),
+        ),
+      ),
+    );
+    if (tooltip == null) return b;
+    return Tooltip(message: tooltip!, child: b);
+  }
+}
