@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../core/palette.dart';
 import '../../core/theme.dart';
 import '../../services/mock_auth_service.dart';
@@ -46,9 +47,7 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 44),
               Text(
                 'Welcome back',
-                style: TextStyle(
-                  fontFamily: 'SpaceGrotesk',
-                  fontSize: 30,
+                style: GoogleFonts.rubik(fontSize: 30,
                   fontWeight: FontWeight.w700,
                   color: tk.textPrimary,
                   letterSpacing: -.8,
@@ -193,9 +192,7 @@ class _SignupScreenState extends State<SignupScreen> {
               const SizedBox(height: 10),
               Text(
                 'Create your account',
-                style: TextStyle(
-                  fontFamily: 'SpaceGrotesk',
-                  fontSize: 28,
+                style: GoogleFonts.rubik(fontSize: 28,
                   fontWeight: FontWeight.w700,
                   color: tk.textPrimary,
                   letterSpacing: -.8,

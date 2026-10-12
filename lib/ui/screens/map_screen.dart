@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../core/formatters.dart';
 import '../../core/palette.dart';
 import '../../core/theme.dart';
@@ -154,9 +155,7 @@ class _MapScreenState extends State<MapScreen> {
                           const SizedBox(width: 10),
                           Text(
                             Fmt.distance(engine.distance),
-                            style: TextStyle(
-                              fontFamily: 'SpaceGrotesk',
-                              fontSize: 15,
+                            style: GoogleFonts.rubik(fontSize: 15,
                               fontWeight: FontWeight.w700,
                               color: tk.textPrimary,
                             ),
@@ -239,9 +238,7 @@ class _MapScreenState extends State<MapScreen> {
                           children: [
                             Text(
                               b.name,
-                              style: TextStyle(
-                                fontFamily: 'SpaceGrotesk',
-                                fontSize: 14.5,
+                              style: GoogleFonts.rubik(fontSize: 14.5,
                                 fontWeight: FontWeight.w700,
                                 color: tk.textPrimary,
                               ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../core/formatters.dart';
 import '../../core/palette.dart';
 import '../../core/theme.dart';
@@ -100,9 +101,7 @@ class _AlertBody extends StatelessWidget {
               Text(
                 'Your bag may be lost',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontFamily: 'SpaceGrotesk',
-                  fontSize: 27,
+                style: GoogleFonts.rubik(fontSize: 27,
                   fontWeight: FontWeight.w700,
                   color: tk.textPrimary,
                   letterSpacing: -.6,
@@ -187,7 +186,7 @@ class _AlertStat extends StatelessWidget {
           const SizedBox(height: 7),
           Text(
             value,
-            style: TextStyle(fontFamily: 'SpaceGrotesk', fontSize: 21, fontWeight: FontWeight.w700, color: color),
+            style: GoogleFonts.rubik(fontSize: 21, fontWeight: FontWeight.w700, color: color),
           ),
         ],
       ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../core/formatters.dart';
 import '../../core/palette.dart';
 import '../../core/theme.dart';
@@ -45,9 +46,7 @@ class DashboardScreen extends StatelessWidget {
             const SizedBox(height: 6),
             Text(
               _greeting(auth.user?.name ?? 'there'),
-              style: TextStyle(
-                fontFamily: 'SpaceGrotesk',
-                fontSize: 23,
+              style: GoogleFonts.rubik(fontSize: 23,
                 fontWeight: FontWeight.w700,
                 color: tk.textPrimary,
                 letterSpacing: -.5,
@@ -92,9 +91,7 @@ class DashboardScreen extends StatelessWidget {
                       children: [
                         Text(
                           Fmt.distance(engine.distance),
-                          style: TextStyle(
-                            fontFamily: 'SpaceGrotesk',
-                            fontSize: 46,
+                          style: GoogleFonts.rubik(fontSize: 46,
                             height: 1,
                             fontWeight: FontWeight.w700,
                             color: tk.textPrimary,
@@ -239,9 +236,7 @@ class _Avatar extends StatelessWidget {
       ),
       child: Text(
         initial,
-        style: const TextStyle(
-          fontFamily: 'SpaceGrotesk',
-          fontSize: 16,
+        style: GoogleFonts.rubik(fontSize: 16,
           fontWeight: FontWeight.w700,
           color: Colors.white,
         ),
@@ -269,9 +264,7 @@ class _QuickAction extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             label,
-            style: TextStyle(
-              fontFamily: 'SpaceGrotesk',
-              fontSize: 12,
+            style: GoogleFonts.rubik(fontSize: 12,
               fontWeight: FontWeight.w600,
               color: tk.textSecondary,
             ),
@@ -367,9 +360,7 @@ class EventTile extends StatelessWidget {
               children: [
                 Text(
                   event.type.label,
-                  style: TextStyle(
-                    fontFamily: 'SpaceGrotesk',
-                    fontSize: 13,
+                  style: GoogleFonts.rubik(fontSize: 13,
                     fontWeight: FontWeight.w700,
                     color: tk.textPrimary,
                   ),
@@ -387,9 +378,7 @@ class EventTile extends StatelessWidget {
           const SizedBox(width: 8),
           Text(
             Fmt.clock(event.time),
-            style: TextStyle(
-              fontFamily: 'SpaceGrotesk',
-              fontSize: 11,
+            style: GoogleFonts.rubik(fontSize: 11,
               color: tk.textTertiary,
             ),
           ),

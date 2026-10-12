@@ -15,6 +15,17 @@ All notable changes to Trackio are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/) and the project adheres to
 semantic versioning.
 
+## [Unreleased]
+
+### Changed
+
+- **Typefaces moved to Google Fonts** via the `google_fonts` package, with a
+  locked three-face plan (`lib/core/fonts.dart`): **Rubik** for all English
+  UI text (headings, body, numerals — variable 300–900, true weights),
+  **Jaro** reserved for the logo wordmark and stylised brand moments, and
+  **Zain** applied automatically when the locale is Arabic (`ar`). The
+  bundled Space Grotesk / Inter assets were removed.
+
 ## [1.0.0] — Stakeholder demonstration build
 
 ### Added

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme.dart';
 import '../../services/scenario_director.dart';
 import '../../services/simulation_engine.dart';
@@ -47,7 +48,7 @@ class DemoPanel {
                   children: [
                     Text(
                       'Demo Controls',
-                      style: TextStyle(fontFamily: 'SpaceGrotesk', fontSize: 19, fontWeight: FontWeight.w700, color: tk.textPrimary),
+                      style: GoogleFonts.rubik(fontSize: 19, fontWeight: FontWeight.w700, color: tk.textPrimary),
                     ),
                     const Spacer(),
                     IconButton2(icon: Icons.close_rounded, onTap: () => Navigator.pop(ctx)),
@@ -76,7 +77,7 @@ class DemoPanel {
                           const SizedBox(width: 8),
                           Text(
                             'Scripted scenario',
-                            style: TextStyle(fontFamily: 'SpaceGrotesk', fontWeight: FontWeight.w700, fontSize: 14, color: tk.textPrimary),
+                            style: GoogleFonts.rubik(fontWeight: FontWeight.w700, fontSize: 14, color: tk.textPrimary),
                           ),
                           const Spacer(),
                           if (engine.scenarioCaption != null)

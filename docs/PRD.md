@@ -260,8 +260,16 @@ are reserved for alert severities only.
 
 ### Typography
 
-- **Display/headings:** Space Grotesk (bundled locally).
-- **Body/UI:** Inter (bundled locally).
+Loaded through the `google_fonts` package — the plan is locked in
+`lib/core/fonts.dart`:
+
+- **English UI (all text):** Rubik — variable 300–900, so headings, body and
+  numerals render with true weights.
+- **Logo / stylised brand moments only:** Jaro — single-weight (400) display
+  face reserved for the wordmark and branded surfaces; never for body copy,
+  buttons or data.
+- **Arabic UI only:** Zain — applied automatically by the app-level builder
+  in `lib/app.dart` whenever the resolved locale is `ar`.
 - Tabular numerals for the distance readout; no text smaller than 12 px.
 
 ## 10. Demonstration build scope (this repository)

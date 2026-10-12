@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../core/palette.dart';
 import '../../core/theme.dart';
 import '../../services/mock_auth_service.dart';
@@ -107,9 +108,7 @@ class _OtpScreenState extends State<OtpScreen> {
               const SizedBox(height: 26),
               Text(
                 'Verify your email',
-                style: TextStyle(
-                  fontFamily: 'SpaceGrotesk',
-                  fontSize: 27,
+                style: GoogleFonts.rubik(fontSize: 27,
                   fontWeight: FontWeight.w700,
                   color: tk.textPrimary,
                   letterSpacing: -.7,
@@ -165,11 +164,10 @@ class _OtpScreenState extends State<OtpScreen> {
                         auth.demoOtp != null
                             ? 'Demo OTP: ${auth.demoOtp!.substring(0, 3)} ${auth.demoOtp!.substring(3)} — production sends this via Supabase.'
                             : 'Demo build — OTP shown here instead of email.',
-                        style: TextStyle(
+                        style: GoogleFonts.rubik(
                           fontSize: 12.5,
                           color: tk.textSecondary,
                           height: 1.4,
-                          fontFamily: 'SpaceGrotesk',
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -206,9 +204,7 @@ class _OtpScreenState extends State<OtpScreen> {
         textAlign: TextAlign.center,
         keyboardType: TextInputType.number,
         maxLength: 1,
-        style: TextStyle(
-          fontFamily: 'SpaceGrotesk',
-          fontSize: 22,
+        style: GoogleFonts.rubik(fontSize: 22,
           fontWeight: FontWeight.w700,
           color: _error ? Semantic.danger : tk.textPrimary,
         ),

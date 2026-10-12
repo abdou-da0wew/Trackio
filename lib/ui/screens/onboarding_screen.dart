@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../core/palette.dart';
 import '../../core/theme.dart';
 import '../../services/settings_service.dart';
@@ -77,9 +78,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         Text(
                           title,
                           textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontFamily: 'SpaceGrotesk',
-                            fontSize: 27,
+                          style: GoogleFonts.rubik(fontSize: 27,
                             fontWeight: FontWeight.w700,
                             color: tk.textPrimary,
                             letterSpacing: -.5,

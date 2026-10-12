@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'fonts.dart';
 import 'palette.dart';
 
 /// Design tokens that change per brightness, resolved via ThemeExtension.
@@ -106,8 +108,8 @@ class TkColors extends ThemeExtension<TkColors> {
 }
 
 class Tk {
-  static const display = 'SpaceGrotesk';
-  static const body = 'Inter';
+  // Typeface plan lives in core/fonts.dart:
+  //   Rubik = all English UI text · Jaro = logo/stylised only · Zain = Arabic (ar locale)
 
   static ThemeData theme(Brightness brightness) {
     const dark = TkColors.dark;
@@ -127,22 +129,25 @@ class Tk {
         .englishLike
         .apply(bodyColor: c.textPrimary, displayColor: c.textPrimary);
 
-    TextTheme textTheme = baseText.copyWith(
-      displayLarge: baseText.displayLarge?.copyWith(fontFamily: Tk.display, fontWeight: FontWeight.w700, letterSpacing: -1.5),
-      displayMedium: baseText.displayMedium?.copyWith(fontFamily: Tk.display, fontWeight: FontWeight.w700, letterSpacing: -1.2),
-      displaySmall: baseText.displaySmall?.copyWith(fontFamily: Tk.display, fontWeight: FontWeight.w700, letterSpacing: -1),
-      headlineLarge: baseText.headlineLarge?.copyWith(fontFamily: Tk.display, fontWeight: FontWeight.w700, letterSpacing: -0.8),
-      headlineMedium: baseText.headlineMedium?.copyWith(fontFamily: Tk.display, fontWeight: FontWeight.w700, letterSpacing: -0.6),
-      headlineSmall: baseText.headlineSmall?.copyWith(fontFamily: Tk.display, fontWeight: FontWeight.w700, letterSpacing: -0.4),
-      titleLarge: baseText.titleLarge?.copyWith(fontFamily: Tk.display, fontWeight: FontWeight.w600, letterSpacing: -0.2),
-      titleMedium: baseText.titleMedium?.copyWith(fontFamily: Tk.display, fontWeight: FontWeight.w600),
-      titleSmall: baseText.titleSmall?.copyWith(fontFamily: Tk.display, fontWeight: FontWeight.w600),
-      bodyLarge: baseText.bodyLarge?.copyWith(fontFamily: Tk.body, height: 1.45),
-      bodyMedium: baseText.bodyMedium?.copyWith(fontFamily: Tk.body, height: 1.45),
-      bodySmall: baseText.bodySmall?.copyWith(fontFamily: Tk.body, height: 1.35),
-      labelLarge: baseText.labelLarge?.copyWith(fontFamily: Tk.display, fontWeight: FontWeight.w600, letterSpacing: 0.2),
-      labelMedium: baseText.labelMedium?.copyWith(fontFamily: Tk.body, fontWeight: FontWeight.w600, letterSpacing: 0.3),
-      labelSmall: baseText.labelSmall?.copyWith(fontFamily: Tk.body, letterSpacing: 0.4),
+    // Rubik carries all English UI text (see core/fonts.dart); the app-level
+    // builder in app.dart swaps this for Zain when the locale is Arabic.
+    final rubik = AppFonts.english(baseText);
+    TextTheme textTheme = rubik.copyWith(
+      displayLarge: rubik.displayLarge?.copyWith(fontWeight: FontWeight.w700, letterSpacing: -1.5),
+      displayMedium: rubik.displayMedium?.copyWith(fontWeight: FontWeight.w700, letterSpacing: -1.2),
+      displaySmall: rubik.displaySmall?.copyWith(fontWeight: FontWeight.w700, letterSpacing: -1),
+      headlineLarge: rubik.headlineLarge?.copyWith(fontWeight: FontWeight.w700, letterSpacing: -0.8),
+      headlineMedium: rubik.headlineMedium?.copyWith(fontWeight: FontWeight.w700, letterSpacing: -0.6),
+      headlineSmall: rubik.headlineSmall?.copyWith(fontWeight: FontWeight.w700, letterSpacing: -0.4),
+      titleLarge: rubik.titleLarge?.copyWith(fontWeight: FontWeight.w600, letterSpacing: -0.2),
+      titleMedium: rubik.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+      titleSmall: rubik.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+      bodyLarge: rubik.bodyLarge?.copyWith(height: 1.45),
+      bodyMedium: rubik.bodyMedium?.copyWith(height: 1.45),
+      bodySmall: rubik.bodySmall?.copyWith(height: 1.35),
+      labelLarge: rubik.labelLarge?.copyWith(fontWeight: FontWeight.w600, letterSpacing: 0.2),
+      labelMedium: rubik.labelMedium?.copyWith(fontWeight: FontWeight.w600, letterSpacing: 0.3),
+      labelSmall: rubik.labelSmall?.copyWith(letterSpacing: 0.4),
     );
 
     final isDark = brightness == Brightness.dark;
@@ -224,7 +229,7 @@ class Tk {
         overlayColor: c.accent.withValues(alpha: .15),
         trackHeight: 5,
         valueIndicatorColor: c.accentDeep,
-        valueIndicatorTextStyle: const TextStyle(fontFamily: Tk.display, color: Colors.white, fontSize: 12),
+        valueIndicatorTextStyle: GoogleFonts.rubik(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
       ),
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith((s) =>

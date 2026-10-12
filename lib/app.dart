@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'core/fonts.dart';
 import 'core/theme.dart';
 import 'services/mock_auth_service.dart';
 import 'services/settings_service.dart';
@@ -19,9 +20,32 @@ class TrackioApp extends StatelessWidget {
     return MaterialApp(
       title: 'Trackio',
       debugShowCheckedModeBanner: false,
+      supportedLocales: const [Locale('en'), Locale('ar')],
       theme: Tk.theme(Brightness.light),
       darkTheme: Tk.theme(Brightness.dark),
       themeMode: settings.themeMode,
+      // Typeface plan (core/fonts.dart): Rubik = English · Jaro = logo only ·
+      // Zain = Arabic only. When the platform/browser locale resolves to `ar`,
+      // this builder re-themes the tree with the Zain text theme so every
+      // widget — including AppBar titles — renders in Zain without per-widget
+      // changes. English and other locales keep Rubik untouched.
+      builder: (context, child) {
+        final locale = Localizations.localeOf(context);
+        if (locale.languageCode != 'ar') return child!;
+        final base = Theme.of(context);
+        final zain = AppFonts.arabic(base.textTheme);
+        return Theme(
+          data: base.copyWith(
+            textTheme: zain,
+            appBarTheme: base.appBarTheme.copyWith(
+              titleTextStyle: zain.titleLarge?.copyWith(
+                color: base.appBarTheme.foregroundColor,
+              ),
+            ),
+          ),
+          child: child!,
+        );
+      },
       home: _EntryGate(),
       routes: {
         '/onboarding': (_) => const OnboardingScreen(),

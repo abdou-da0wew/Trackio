@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../core/palette.dart';
 import '../../models/models.dart';
 import 'common.dart';
@@ -228,9 +229,7 @@ class DistanceLabelMarker extends Marker {
               ),
               child: Text(
                 text,
-                style: TextStyle(
-                  fontFamily: 'SpaceGrotesk',
-                  fontSize: 12,
+                style: GoogleFonts.rubik(fontSize: 12,
                   fontWeight: FontWeight.w700,
                   color: Colors.white,
                 ),

@@ -1,6 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../core/formatters.dart';
 import '../../core/palette.dart';
 import '../../core/theme.dart';
@@ -114,9 +115,7 @@ class _Summary extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             value,
-            style: TextStyle(
-              fontFamily: 'SpaceGrotesk',
-              fontSize: 19,
+            style: GoogleFonts.rubik(fontSize: 19,
               fontWeight: FontWeight.w700,
               color: tk.textPrimary,
             ),
@@ -226,9 +225,7 @@ class _DistanceChart extends StatelessWidget {
             getTooltipItems: (spots) => spots
                 .map((s) => LineTooltipItem(
                       '${s.y.round()} m',
-                      TextStyle(
-                        fontFamily: 'SpaceGrotesk',
-                        color: tk.textPrimary,
+                      GoogleFonts.rubik(color: tk.textPrimary,
                         fontWeight: FontWeight.w700,
                       ),
                     ))

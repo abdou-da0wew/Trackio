@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../../core/fonts.dart';
 import '../../core/palette.dart';
 import '../../core/theme.dart';
 import '../../models/models.dart';
@@ -20,7 +22,7 @@ class StatusTheme {
       };
 }
 
-/// Trackio wordmark: radar glyph + display type.
+/// Trackio wordmark: radar glyph + Jaro display type (logo face only).
 class TkWordmark extends StatelessWidget {
   final double size;
   final Color? color;
@@ -52,23 +54,11 @@ class TkWordmark extends StatelessWidget {
             children: [
               TextSpan(
                 text: 'Track',
-                style: TextStyle(
-                  fontFamily: 'SpaceGrotesk',
-                  fontSize: size,
-                  fontWeight: FontWeight.w700,
-                  color: c,
-                  letterSpacing: -.5,
-                ),
+                style: AppFonts.logo(fontSize: size, color: c, letterSpacing: -.5),
               ),
               TextSpan(
                 text: 'io',
-                style: TextStyle(
-                  fontFamily: 'SpaceGrotesk',
-                  fontSize: size,
-                  fontWeight: FontWeight.w700,
-                  color: tk.accent,
-                  letterSpacing: -.5,
-                ),
+                style: AppFonts.logo(fontSize: size, color: tk.accent, letterSpacing: -.5),
               ),
             ],
           ),
@@ -107,9 +97,7 @@ class StatusPill extends StatelessWidget {
             const SizedBox(width: 7),
             Text(
               st.label,
-              style: TextStyle(
-                fontFamily: 'SpaceGrotesk',
-                fontSize: 11.5,
+              style: GoogleFonts.rubik(fontSize: 11.5,
                 fontWeight: FontWeight.w700,
                 letterSpacing: .8,
                 color: st.color,
@@ -183,9 +171,7 @@ class MetricChip extends StatelessWidget {
           const SizedBox(width: 6),
           Text(
             label,
-            style: TextStyle(
-              fontFamily: 'SpaceGrotesk',
-              fontSize: 12,
+            style: GoogleFonts.rubik(fontSize: 12,
               fontWeight: FontWeight.w600,
               color: tk.textSecondary,
             ),
@@ -210,9 +196,7 @@ class SectionLabel extends StatelessWidget {
         children: [
           Text(
             text.toUpperCase(),
-            style: TextStyle(
-              fontFamily: 'SpaceGrotesk',
-              fontSize: 12,
+            style: GoogleFonts.rubik(fontSize: 12,
               fontWeight: FontWeight.w700,
               letterSpacing: 1.6,
               color: tk.textTertiary,
@@ -309,9 +293,7 @@ class GradientButton extends StatelessWidget {
                     ],
                     Text(
                       label,
-                      style: TextStyle(
-                        fontFamily: 'SpaceGrotesk',
-                        fontSize: 16,
+                      style: GoogleFonts.rubik(fontSize: 16,
                         fontWeight: FontWeight.w700,
                         color: tk.onAccent,
                         letterSpacing: .2,

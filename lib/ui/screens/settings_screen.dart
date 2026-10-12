@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../core/palette.dart';
 import '../../core/theme.dart';
 import '../../services/mock_auth_service.dart';
@@ -71,9 +72,7 @@ class SettingsScreen extends StatelessWidget {
                     ),
                     title: Text(
                       s.label,
-                      style: TextStyle(
-                        fontFamily: 'SpaceGrotesk',
-                        fontSize: 14,
+                      style: GoogleFonts.rubik(fontSize: 14,
                         fontWeight: FontWeight.w600,
                         color: settings.sound == s ? tk.textPrimary : tk.textSecondary,
                       ),
@@ -147,9 +146,7 @@ class SettingsScreen extends StatelessWidget {
                   leading: const Icon(Icons.storage_rounded),
                   title: Text(
                     'Supabase · self-hosted VDS',
-                    style: TextStyle(
-                      fontFamily: 'SpaceGrotesk',
-                      fontSize: 13.5,
+                    style: GoogleFonts.rubik(fontSize: 13.5,
                       fontWeight: FontWeight.w600,
                       color: tk.textPrimary,
                     ),
@@ -164,9 +161,7 @@ class SettingsScreen extends StatelessWidget {
                   leading: const Icon(Icons.cloud_done_rounded),
                   title: Text(
                     'Tigris object storage',
-                    style: TextStyle(
-                      fontFamily: 'SpaceGrotesk',
-                      fontSize: 13.5,
+                    style: GoogleFonts.rubik(fontSize: 13.5,
                       fontWeight: FontWeight.w600,
                       color: tk.textPrimary,
                     ),
@@ -198,9 +193,7 @@ class SettingsScreen extends StatelessWidget {
                   ),
                   child: Text(
                     (auth.user?.name.isNotEmpty ?? false) ? auth.user!.name[0].toUpperCase() : 'T',
-                    style: const TextStyle(
-                      fontFamily: 'SpaceGrotesk',
-                      fontWeight: FontWeight.w700,
+                    style: GoogleFonts.rubik(fontWeight: FontWeight.w700,
                       fontSize: 17,
                       color: Colors.white,
                     ),
@@ -213,9 +206,7 @@ class SettingsScreen extends StatelessWidget {
                     children: [
                       Text(
                         auth.user?.name ?? 'Trackio User',
-                        style: TextStyle(
-                          fontFamily: 'SpaceGrotesk',
-                          fontSize: 14.5,
+                        style: GoogleFonts.rubik(fontSize: 14.5,
                           fontWeight: FontWeight.w700,
                           color: tk.textPrimary,
                         ),
@@ -290,9 +281,7 @@ class _ThemeOption extends StatelessWidget {
                   const SizedBox(width: 9),
                   Text(
                     label,
-                    style: TextStyle(
-                      fontFamily: 'SpaceGrotesk',
-                      fontSize: 13.5,
+                    style: GoogleFonts.rubik(fontSize: 13.5,
                       fontWeight: FontWeight.w700,
                       color: selected ? tk.accent : tk.textSecondary,
                     ),
@@ -341,9 +330,7 @@ class _IntervalSlider extends StatelessWidget {
               ),
               child: Text(
                 '${value}s',
-                style: TextStyle(
-                  fontFamily: 'SpaceGrotesk',
-                  fontSize: 12,
+                style: GoogleFonts.rubik(fontSize: 12,
                   fontWeight: FontWeight.w700,
                   color: tk.accent,
                 ),
