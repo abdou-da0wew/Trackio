@@ -1,4 +1,15 @@
+<div align="center">
+
 # Changelog
+
+**All notable changes, following [Keep a Changelog](https://keepachangelog.com/) and semver.**
+
+[![← README](https://img.shields.io/badge/%E2%86%90_README-home-001233?style=flat-square)](README.md)
+[![MIT license](https://img.shields.io/badge/license-MIT-0052eb?style=flat-square)](LICENSE)
+
+</div>
+
+---
 
 All notable changes to Trackio are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/) and the project adheres to

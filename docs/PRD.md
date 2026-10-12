@@ -1,4 +1,17 @@
-# Trackio — Product Requirements Document
+<div align="center">
+
+# Trackio — PRD
+
+**Product requirements for smart bag tracking: features, bag module, backend, design tokens, roadmap.**
+
+[![← README](https://img.shields.io/badge/%E2%86%90_README-home-001233?style=flat-square)](../README.md)
+[![Architecture](https://img.shields.io/badge/docs-architecture-4c5769?style=flat-square)](ARCHITECTURE.md)
+[![Demo guide](https://img.shields.io/badge/docs-demo_guide-4c5769?style=flat-square)](DEMO_GUIDE.md)
+[![MIT license](https://img.shields.io/badge/license-MIT-0052eb?style=flat-square)](../LICENSE)
+
+</div>
+
+---
 
 | | |
 |---|---|

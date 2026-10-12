@@ -1,4 +1,17 @@
+<div align="center">
+
 # Contributing to Trackio
+
+**Ground rules for code, design tokens and commits.**
+
+[![← README](https://img.shields.io/badge/%E2%86%90_README-home-001233?style=flat-square)](README.md)
+[![CI](https://img.shields.io/github/actions/workflow/status/abdou-da0wew/Trackio/ci.yml?branch=main&style=flat-square&label=CI)](.github/workflows/ci.yml)
+[![PRs welcome](https://img.shields.io/badge/PRs-welcome-2da78f?style=flat-square)](#pull-requests)
+[![MIT license](https://img.shields.io/badge/license-MIT-0052eb?style=flat-square)](LICENSE)
+
+</div>
+
+---
 
 Thanks for helping build Trackio. This document covers the rules of the road
 for code, design tokens and commits.

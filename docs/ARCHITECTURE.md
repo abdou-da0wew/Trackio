@@ -1,8 +1,23 @@
+<div align="center">
+
 # Trackio — Architecture
+
+**How the demo build is wired: layers, the tracking pipeline, and the mock→production swap.**
+
+[![← README](https://img.shields.io/badge/%E2%86%90_README-home-001233?style=flat-square)](../README.md)
+[![PRD](https://img.shields.io/badge/docs-PRD-4c5769?style=flat-square)](PRD.md)
+[![Demo guide](https://img.shields.io/badge/docs-demo_guide-4c5769?style=flat-square)](DEMO_GUIDE.md)
+[![MIT license](https://img.shields.io/badge/license-MIT-0052eb?style=flat-square)](../LICENSE)
+
+</div>
+
+---
 
 This document explains how the demo build is put together, how data flows
 through the tracking pipeline, and exactly how production integrations
 replace the simulation without touching UI code.
+
+<img src="assets/architecture.png" alt="System architecture: Trackio app and ESP32 bag module over a radio link, syncing to self-hosted Supabase and Tigris" width="820" />
 
 ---
 
@@ -53,7 +68,10 @@ lives behind a service with a production-shaped surface (§6).
 
 ## 3. The tracking pipeline (`SimulationEngine`)
 
-A single wall-clock tick drives the whole simulation:
+A single wall-clock tick drives the whole simulation. Three noisy signals in,
+one honest distance number out, checked against the thresholds every tick:
+
+<img src="assets/fusion.png" alt="Data flow: phone GPS, radio RSSI and bag GPS feed the fusion engine; its distance passes the 30 m and 80 m threshold check driving UI and event log" width="820" />
 
 ```
 tick (sim time × speed)
@@ -74,7 +92,11 @@ tick (sim time × speed)
 ```
 
 Phases: `safe → drifting → weak → lost → recovering → found`, each with its
-own dashboard treatment, radar rendering, and alert behaviour. The engine is
+own dashboard treatment, radar rendering, and alert behaviour:
+
+<img src="assets/lifecycle.png" alt="State machine from Safe through Warning and Lost with panic packets to Recovering and Found" width="820" />
+
+The engine is
 deterministic given the same inputs — demo playback is repeatable, and
 `poseForShot(...)` lets QA stage exact poses for screenshots.
 

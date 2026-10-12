@@ -1,4 +1,17 @@
-# Trackio — Stakeholder Demo Guide
+<div align="center">
+
+# Trackio — Demo Guide
+
+**Present Trackio convincingly in five minutes — with a two-minute fallback and a URL for every state.**
+
+[![← README](https://img.shields.io/badge/%E2%86%90_README-home-001233?style=flat-square)](../README.md)
+[![PRD](https://img.shields.io/badge/docs-PRD-4c5769?style=flat-square)](PRD.md)
+[![Architecture](https://img.shields.io/badge/docs-architecture-4c5769?style=flat-square)](ARCHITECTURE.md)
+[![MIT license](https://img.shields.io/badge/license-MIT-0052eb?style=flat-square)](../LICENSE)
+
+</div>
+
+---
 
 Everything you need to present Trackio convincingly in five minutes — with a
 fallback two-minute version and a URL trick for every state.
