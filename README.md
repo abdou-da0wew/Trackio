@@ -11,13 +11,8 @@
 [![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?style=flat-square&logo=flutter&logoColor=white)](https://flutter.dev)
 [![Dart](https://img.shields.io/badge/Dart-3.x-0175C2?style=flat-square&logo=dart&logoColor=white)](https://dart.dev)
 [![Platform](https://img.shields.io/badge/platform-Android_%7C_iOS_%7C_Web-001233?style=flat-square)](#quick-start)
-[![CI](https://img.shields.io/github/actions/workflow/status/abdou-da0wew/Trackio/ci.yml?branch=main&style=flat-square&label=CI)](https://github.com/abdou-da0wew/Trackio/actions/workflows/ci.yml)
-[![GitHub stars](https://img.shields.io/github/stars/abdou-da0wew/Trackio?style=flat-square&color=0052eb)](https://github.com/abdou-da0wew/Trackio/stargazers)
-[![Last commit](https://img.shields.io/github/last-commit/abdou-da0wew/Trackio/main?style=flat-square&color=4c5769)](https://github.com/abdou-da0wew/Trackio/commits/main)
-[![Repo size](https://img.shields.io/github/repo-size/abdou-da0wew/Trackio?style=flat-square&color=4c5769)](https://github.com/abdou-da0wew/Trackio)
-[![Issues](https://img.shields.io/github/issues/abdou-da0wew/Trackio?style=flat-square&color=f4c430)](https://github.com/abdou-da0wew/Trackio/issues)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-2da78f?style=flat-square)](CONTRIBUTING.md)
-[![MIT license](https://img.shields.io/github/license/abdou-da0wew/Trackio?style=flat-square&color=0052eb)](LICENSE)
+[![MIT license](https://img.shields.io/badge/license-MIT-0052eb?style=flat-square)](LICENSE)
 [![Demo mode](https://img.shields.io/badge/demo-movie_mode-0052eb?style=flat-square)](docs/DEMO_GUIDE.md)
 
 **[Demo guide](docs/DEMO_GUIDE.md) · [Architecture](docs/ARCHITECTURE.md) · [Product spec](docs/PRD.md) · [Gallery](docs/screenshots)**
@@ -224,7 +219,7 @@ deep link that reproduces it (e.g. <code>?shot=home&state=alert&panel=1</code>)
 | [`docs/PRD.md`](docs/PRD.md) | Full product requirements: features, bag module (ESP32), backend, complete colour-spec tables, roadmap |
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Layers, simulation pipeline, data model, ESP32 packet protocol, mock→production swap table |
 | [`docs/DEMO_GUIDE.md`](docs/DEMO_GUIDE.md) | 5-minute stakeholder script, manual controls, deep links, FAQ |
-| [`CONTRIBUTING.md`](CONTRIBUTING.md) | Ground rules (palette tokens, service boundaries), commit style, CI |
+| [`CONTRIBUTING.md`](CONTRIBUTING.md) | Ground rules (palette tokens, service boundaries), commit style |
 | [`CHANGELOG.md`](CHANGELOG.md) | Release notes |
 | [`SECURITY.md`](SECURITY.md) | Responsible disclosure |
 
@@ -234,9 +229,9 @@ We'd love your help — real platform channels for GPS/radio, `supabase_flutter`
 wiring, ESP32 firmware, localisation, widget tests. Open an
 [issue](https://github.com/abdou-da0wew/Trackio/issues) or a
 [pull request](https://github.com/abdou-da0wew/Trackio/pulls);
-[CONTRIBUTING.md](CONTRIBUTING.md) has the ground rules. CI runs
-`flutter analyze` and `flutter test` on every push — the palette-lock test
-means no hardcoded colours survive review.
+[CONTRIBUTING.md](CONTRIBUTING.md) has the ground rules. Every change is gated
+by `flutter analyze` and `flutter test` — the palette-lock test means no
+hardcoded colours survive review.
 
 ## Disclaimer
 
