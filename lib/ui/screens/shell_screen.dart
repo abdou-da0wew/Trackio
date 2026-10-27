@@ -8,19 +8,22 @@ import '../../services/scenario_director.dart';
 import '../../services/settings_service.dart';
 import '../../services/simulation_engine.dart';
 import '../../services/sound_service.dart';
+import '../../services/tracking/tracking_controller.dart';
+import '../../services/tracking/tracking_engine.dart';
 import '../widgets/alert_overlay.dart';
 import '../widgets/demo_panel.dart';
+import '../widgets/device_panel.dart';
 import 'dashboard_screen.dart';
 import 'history_screen.dart';
 import 'map_screen.dart';
 import 'settings_screen.dart';
 
-/// App shell: 4 tabs + alert overlay + scenario caption HUD + demo lab.
+/// App shell: 4 tabs + alert overlay + scenario caption HUD + lab/device panel.
 ///
 /// Perf note: the shell does NOT rebuild on engine ticks. Sound edge-triggers
 /// and the "found" confirmation live in an engine listener; the two widgets
 /// that need live data (caption HUD, alert overlay) listen to the engine
-/// themselves, so tab content stays steady while the simulation runs.
+/// themselves, so tab content stays steady while telemetry flows.
 class ShellScreen extends StatefulWidget {
   const ShellScreen({super.key});
   @override
@@ -32,15 +35,15 @@ class _ShellScreenState extends State<ShellScreen> {
   bool _readArgs = false;
   bool _wasDanger = false;
   TrackStatus _prevStatus = TrackStatus.tracking;
-  SimulationEngine? _engine;
+  TrackingEngine? _engine;
 
   @override
   void initState() {
     super.initState();
-    // demo/QA flag: ?panel=1 opens the demo control sheet automatically
+    // demo/QA flag: ?panel=1 opens the control sheet automatically
     if (Uri.base.queryParameters['panel'] == '1') {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) _openDemo();
+        if (mounted) _openPanel();
       });
     }
   }
@@ -48,7 +51,7 @@ class _ShellScreenState extends State<ShellScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final engine = context.read<SimulationEngine>();
+    final engine = context.read<TrackingController>().engine;
     if (_engine != engine) {
       _engine?.removeListener(_onEngineTick);
       _engine = engine..addListener(_onEngineTick);
@@ -99,7 +102,8 @@ class _ShellScreenState extends State<ShellScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final engine = context.read<SimulationEngine>();
+    final controller = context.watch<TrackingController>();
+    final engine = controller.engine;
     final l = l10nOf(context);
     final tk = tkOf(context);
 
@@ -109,8 +113,8 @@ class _ShellScreenState extends State<ShellScreen> {
           IndexedStack(
             index: _index,
             children: [
-              DashboardScreen(onGoMap: () => setState(() => _index = 1), onDemo: _openDemo),
-              MapScreen(onDemo: _openDemo),
+              DashboardScreen(onGoMap: () => setState(() => _index = 1), onDemo: _openPanel),
+              MapScreen(onDemo: _openPanel),
               const HistoryScreen(),
               const SettingsScreen(),
             ],
@@ -146,7 +150,7 @@ class _ShellScreenState extends State<ShellScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton.small(
-        heroTag: 'demo-lab',
+        heroTag: 'device-lab',
         elevation: 0,
         backgroundColor: tk.card,
         foregroundColor: tk.accent,
@@ -154,8 +158,11 @@ class _ShellScreenState extends State<ShellScreen> {
           borderRadius: BorderRadius.circular(15),
           side: BorderSide(color: tk.stroke),
         ),
-        onPressed: _openDemo,
-        child: const Icon(Icons.science_rounded, size: 20),
+        onPressed: _openPanel,
+        child: Icon(
+          controller.isLive ? Icons.bluetooth_rounded : Icons.science_rounded,
+          size: 20,
+        ),
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
@@ -170,10 +177,18 @@ class _ShellScreenState extends State<ShellScreen> {
     );
   }
 
-  void _openDemo() {
-    final engine = context.read<SimulationEngine>();
-    final director = context.read<ScenarioDirector>();
-    DemoPanel.show(context, engine: engine, director: director);
+  /// BLE source → the real device panel; simulation source → the demo lab.
+  void _openPanel() {
+    final controller = context.read<TrackingController>();
+    if (controller.isLive) {
+      DevicePanel.show(context, ble: context.read());
+    } else {
+      DemoPanel.show(
+        context,
+        engine: context.read<SimulationEngine>(),
+        director: context.read<ScenarioDirector>(),
+      );
+    }
   }
 }
 

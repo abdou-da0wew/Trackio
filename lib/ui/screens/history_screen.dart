@@ -7,7 +7,7 @@ import '../../core/palette.dart';
 import '../../core/theme.dart';
 import '../../core/l10n_text.dart';
 import '../../models/models.dart';
-import '../../services/simulation_engine.dart';
+import '../../services/tracking/tracking_controller.dart';
 import '../widgets/common.dart';
 import '../screens/dashboard_screen.dart' show EventTile;
 
@@ -18,7 +18,7 @@ class HistoryScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final tk = tkOf(context);
     final l = l10nOf(context);
-    final engine = context.watch<SimulationEngine>();
+    final engine = context.watch<TrackingController>().engine;
 
     final lostEvents = engine.events.where((e) => e.type == TrackEventType.lost).length;
     final avg = engine.distanceHistory.isEmpty
@@ -237,7 +237,7 @@ class _DistanceChart extends StatelessWidget {
         extraLinesData: ExtraLinesData(
           horizontalLines: [
             HorizontalLine(
-              y: SimulationEngine.lostM,
+              y: engine.lostMeters,
               color: Semantic.danger.withValues(alpha: .55),
               strokeWidth: 1.2,
               dashArray: [6, 5],

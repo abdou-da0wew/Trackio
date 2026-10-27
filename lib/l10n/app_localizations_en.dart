@@ -597,4 +597,153 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get capFound => 'Bag recovered';
+
+  @override
+  String get connectTitle => 'Connect your Trackio module';
+
+  @override
+  String connectSubtitle(String name) {
+    return 'Power on the ESP32 module and choose it below. It advertises as $name.';
+  }
+
+  @override
+  String get connectPasskeyTitle => 'Pairing passkey';
+
+  @override
+  String connectPasskeyBody(String passkey) {
+    return 'When the system pairing prompt appears, enter passkey $passkey.';
+  }
+
+  @override
+  String get connectScan => 'Scan for devices';
+
+  @override
+  String get connectScanning => 'Scanning for modules…';
+
+  @override
+  String get connectNoDevices => 'No modules found';
+
+  @override
+  String get connectNoDevicesHint =>
+      'Make sure the module is powered and its status LED is blinking.';
+
+  @override
+  String get connectUnsupported =>
+      'Bluetooth is not supported on this device or browser.';
+
+  @override
+  String get connectBluetoothOff => 'Bluetooth is turned off';
+
+  @override
+  String get connectTurnOn => 'Turn on Bluetooth';
+
+  @override
+  String get connectPermissionTitle => 'Bluetooth permission required';
+
+  @override
+  String get connectGrantPermission => 'Grant permission';
+
+  @override
+  String get connectPairing =>
+      'Pairing… enter the passkey shown on your module when the system prompts';
+
+  @override
+  String connectConnecting(String name) {
+    return 'Connecting to $name…';
+  }
+
+  @override
+  String connectReconnecting(int n) {
+    return 'Link lost · reconnecting (attempt $n)';
+  }
+
+  @override
+  String get connectConnected => 'Connected · live telemetry is flowing';
+
+  @override
+  String get connectRetry => 'Retry connection';
+
+  @override
+  String get connectOpenTracker => 'Open live tracking';
+
+  @override
+  String get connectContinueSim => 'Explore without hardware';
+
+  @override
+  String get connectSimNote =>
+      'Simulation mode replaces the radio link with a deterministic demo engine.';
+
+  @override
+  String get connectForget => 'Forget this module';
+
+  @override
+  String connectLastModule(String name) {
+    return 'Last paired module: $name';
+  }
+
+  @override
+  String get connectSearchHint =>
+      'The module runs a GATT server with a secure, bonded link.';
+
+  @override
+  String get devicePanelTitle => 'Tracker module';
+
+  @override
+  String get devicePing => 'Ping';
+
+  @override
+  String get deviceStatus => 'Full status';
+
+  @override
+  String get deviceVersion => 'Firmware version';
+
+  @override
+  String get deviceReadSettings => 'Read settings';
+
+  @override
+  String get deviceDisconnect => 'Disconnect';
+
+  @override
+  String get deviceReconnect => 'Reconnect';
+
+  @override
+  String get deviceResponseLog => 'Module responses';
+
+  @override
+  String get deviceEmptyLog => 'No responses yet — send a command.';
+
+  @override
+  String get bleWiredPower => 'Wired power';
+
+  @override
+  String get bleNoLink => 'No radio link';
+
+  @override
+  String get bleBearing => 'Bearing';
+
+  @override
+  String get bleConfidence => 'Confidence';
+
+  @override
+  String get relativeMapTitle => 'Relative radar';
+
+  @override
+  String get relativeMapHint =>
+      "The module has no GPS — direction and distance come from its BLE radar sweep.";
+
+  @override
+  String get evBleLinkUp => 'BLE link established · secure channel active';
+
+  @override
+  String evBleTelemetry(String accuracy) {
+    return 'Live telemetry frame · accuracy ±$accuracy m';
+  }
+
+  @override
+  String evBleWeakLink(int rssi) {
+    return 'Weak radio link · $rssi dBm';
+  }
+
+  @override
+  String get settingsTracker => 'Tracker module';
 }

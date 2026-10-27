@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:latlong2/latlong.dart';
 import '../models/models.dart';
 import 'settings_service.dart';
+import 'tracking/tracking_engine.dart';
 
 /// Simulates the complete Trackio tracking pipeline for the demo build:
 ///
@@ -17,12 +18,32 @@ import 'settings_service.dart';
 /// In production this class is replaced by platform channels (GPS, BLE/FM
 /// radio) and the Supabase sync; the demo UI only consumes ChangeNotifier
 /// state, so the swap is isolated from the presentation layer.
-class SimulationEngine extends ChangeNotifier {
+class SimulationEngine extends ChangeNotifier implements TrackingEngine {
   SimulationEngine(this._settings);
 
   final SettingsService _settings;
   final Distance _dist = const Distance();
   final math.Random _rng = math.Random();
+
+  // ── TrackingEngine source identity ──────────────────────────────────
+  @override
+  TrackingSource get source => TrackingSource.simulation;
+  @override
+  bool get isLive => false;
+  @override
+  bool get hasBattery => true;
+  @override
+  bool get everConnected => true;
+  @override
+  double? get bearingDeg => null;
+  @override
+  int get bearingConfidence => 0;
+  @override
+  double get warningMeters => warningM;
+  @override
+  double get lostMeters => lostM;
+  @override
+  double get reconnectedMeters => reconnectedM;
 
   // ── tuning ────────────────────────────────────────────────────────────
   static const double warningM = 30;

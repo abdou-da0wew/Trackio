@@ -16,6 +16,13 @@
 Everything you need to present Trackio convincingly in five minutes — with a
 fallback two-minute version and a URL trick for every state.
 
+> **Live hardware vs this guide.** The app's default source is now the real
+> ESP32 BLE link (connect screen → scan → pair with passkey `246810`). The
+> scripted flow below runs on the deterministic simulation source, reachable
+> via *Explore without hardware* on the connect screen or the `?shot=…` deep
+> links, which force simulation automatically. See
+> [BLE_INTEGRATION.md](BLE_INTEGRATION.md) for the live protocol.
+
 ---
 
 ## Before you present

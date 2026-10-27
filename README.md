@@ -44,11 +44,12 @@ full-screen alarm, then panic mode, where the bag module reports at 1 Hz for
 as long as battery allows. The alert never expires on its own; only
 **"I found my bag"** ends it.
 
-> This repository currently holds the **stakeholder demonstration build**:
-> the full product vision, workflows and UI, driven by a deterministic
-> simulation engine with mock data, a scripted movie-mode scenario and manual
-> event injection. Production integrations (platform GPS/BLE channels,
-> self-hosted Supabase + Tigris) plug into the same interfaces — see
+> The tracking pipeline now runs on a **real BLE link** to the ESP32
+> follow-car/bag-module firmware: scan, secure pairing (passkey `246810`),
+> live RSSI/telemetry, reconnect and the full loss state machine. The
+> deterministic simulation remains available as an explicit offline/QA
+> mode behind the same `TrackingEngine` interface. See
+> [BLE integration](docs/BLE_INTEGRATION.md) and
 > [What's real vs simulated](#whats-real-vs-simulated).
 
 ## How Trackio works
@@ -94,8 +95,11 @@ flutter run -d chrome     # web demo — fastest, no phone needed
 flutter run               # or pick an Android / iOS device
 ```
 
-No API keys. No accounts. The map tiles are keyless; the tracking pipeline is
-a deterministic simulation; the demo user is whatever you type.
+No API keys. No accounts. The map tiles are keyless. After sign-in the app
+opens the **connect screen**: power on an ESP32 module running the
+[follow-car firmware](docs/BLE_INTEGRATION.md), scan, pair with passkey
+`246810`, and live RSSI telemetry drives the dashboard. *Explore without
+hardware* falls back to the deterministic simulation engine.
 
 ### Stage shortcuts (deep links)
 
@@ -123,10 +127,13 @@ Honest about the seams — that's what makes the demo trustworthy:
 | Component | In this build | In production |
 |---|---|---|
 | Every screen & interaction | ✅ real, working code | same |
-| Tracking phase machine, thresholds, panic mode | ✅ real logic, simulated inputs | real sensors feed the same states |
-| Map | ✅ real keyless Esri canvas tiles (dark/light) | self-hosted tiles or Google Maps — one URL string |
+| BLE transport: scan, secure pair/bond, GATT notify/write, reconnect | ✅ real (`flutter_blue_plus`, Android/iOS/web) | same |
+| RSSI filtering + path-loss distance | ✅ real, Dart port of the firmware DSP, fed by the module's 2 Hz telemetry | same |
+| Tracking phase machine, thresholds, panic/loss flow | ✅ real logic on real link events (RSSI, disconnect, reconnect) | same |
+| Relative radar (distance + radar-sweep bearing) | ✅ real telemetry, polar view (module has no GPS) | add GPS module for geographic map |
+| Map (simulation mode) | ✅ real keyless Esri canvas tiles (dark/light) | self-hosted tiles or Google Maps — one URL string |
 | Alarm sounds, themes, settings persistence | ✅ real | same |
-| Phone GPS / radio RSSI / bag telemetry | 🔶 simulated over a Cairo walking loop | platform channels + ESP32 module |
+| Offline simulation engine | ✅ deterministic Cairo-walk source behind the same interface | QA / demos only |
 | Auth (signup → OTP → session) | 🔶 mock service, identical contract | `supabase_flutter` drop-in |
 | Cloud sync (Supabase + Tigris on VDS) | 🔶 represented in UI | self-hosted stack per the [PRD](docs/PRD.md) |
 
@@ -240,8 +247,9 @@ deep link that reproduces it (e.g. <code>?shot=home&state=alert&panel=1</code>)
 
 | Doc | Contents |
 |---|---|
+| [`docs/BLE_INTEGRATION.md`](docs/BLE_INTEGRATION.md) | Live GATT link: UUIDs, pairing, telemetry frame, RSSI math, loss rules, platform notes |
 | [`docs/PRD.md`](docs/PRD.md) | Full product requirements: features, bag module (ESP32), backend, complete colour-spec tables, roadmap |
-| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Layers, simulation pipeline, data model, ESP32 packet protocol, mock→production swap table |
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Layers, BLE + simulation engines, data model, ESP32 packet protocol, mock→production swap table |
 | [`docs/DEMO_GUIDE.md`](docs/DEMO_GUIDE.md) | 5-minute stakeholder script, manual controls, deep links, FAQ |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | Ground rules (palette tokens, service boundaries), commit style |
 | [`CHANGELOG.md`](CHANGELOG.md) | Release notes |

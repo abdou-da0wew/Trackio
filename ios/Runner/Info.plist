@@ -6,6 +6,10 @@
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>Trackio uses Bluetooth to connect to your ESP32 tracker module and measure live distance and signal strength.</string>
+	<key>NSBluetoothPeripheralUsageDescription</key>
+	<string>Trackio uses Bluetooth to connect to your tracker module.</string>
 	<key>CFBundleLocalizations</key>
 	<array>
 		<string>en</string>

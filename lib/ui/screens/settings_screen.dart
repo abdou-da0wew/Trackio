@@ -4,9 +4,11 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../core/l10n_text.dart';
 import '../../core/palette.dart';
 import '../../core/theme.dart';
+import '../../services/ble/ble_profile.dart';
+import '../../services/ble/esp32_ble_service.dart';
 import '../../services/mock_auth_service.dart';
 import '../../services/settings_service.dart';
-import '../../services/simulation_engine.dart';
+import '../../services/tracking/tracking_controller.dart';
 import '../../services/sound_service.dart';
 import '../widgets/common.dart';
 
@@ -20,13 +22,93 @@ class SettingsScreen extends StatelessWidget {
     final settings = context.watch<SettingsService>();
     final sound = context.read<SoundService>();
     final auth = context.watch<AuthService>();
-    final engine = context.watch<SimulationEngine>();
+    final controller = context.watch<TrackingController>();
+    final engine = controller.engine;
+    final ble = context.watch<Esp32BleService>();
 
     return Scaffold(
       appBar: AppBar(title: Text(l.settingsTitle)),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 6, 20, 30),
         children: [
+          // ── tracker module / data source ──
+          SectionLabel(l.settingsTracker),
+          if (engine.isLive)
+            TkCard(
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              child: Column(
+                children: [
+                  ListTile(
+                    leading: const Icon(Icons.bluetooth_rounded),
+                    title: Text(
+                      ble.connectedName ?? BleProfile.deviceNamePrefix,
+                      style: GoogleFonts.rubik(fontSize: 13.5, fontWeight: FontWeight.w600, color: tk.textPrimary),
+                    ),
+                    subtitle: Text(
+                      ble.connectedId ?? ble.savedDeviceId ?? '—',
+                      style: TextStyle(fontSize: 11, color: tk.textTertiary),
+                    ),
+                    trailing: _StatusDot(
+                      ok: ble.isConnected,
+                      label: l.connected,
+                      downLabel: l.down,
+                    ),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.memory_rounded),
+                    title: Text(
+                      engine.bag.firmware,
+                      style: GoogleFonts.rubik(fontSize: 12.5, fontWeight: FontWeight.w600, color: tk.textSecondary),
+                    ),
+                    subtitle: ble.lastFrame == null
+                        ? null
+                        : Text(
+                            'RSSI ${ble.lastFrame!.rssi} dBm · '
+                            '${ble.lastFrame!.distanceM.toStringAsFixed(2)} m',
+                            style: TextStyle(fontSize: 11, color: tk.textTertiary),
+                          ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(14, 0, 14, 10),
+                    child: OutlinedButton.icon(
+                      onPressed: () => Navigator.pushNamed(context, '/connect'),
+                      icon: const Icon(Icons.bluetooth_searching_rounded, size: 18),
+                      label: Text(l.connectTitle),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          else
+            TkCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.science_rounded, color: tk.accent, size: 20),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          l.connectSimNote,
+                          style: TextStyle(fontSize: 12.5, color: tk.textSecondary, height: 1.4),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  GradientButton(
+                    label: l.connectTitle,
+                    icon: Icons.bluetooth_searching_rounded,
+                    onTap: () {
+                      controller.useBle();
+                      Navigator.pushNamed(context, '/connect');
+                    },
+                  ),
+                ],
+              ),
+            ),
+          const SizedBox(height: 22),
           // ── appearance ──
           SectionLabel(l.sectionAppearance),
           TkCard(

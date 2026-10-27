@@ -25,9 +25,10 @@ replace the simulation without touching UI code.
 
 | Layer | Choice | Notes |
 |---|---|---|
-| Framework | Flutter 3.x / Dart 3.x | Single codebase for Android, iOS, web demo |
+| Framework | Flutter 3.x / Dart 3.x | Single codebase for Android, iOS, web (Web Bluetooth) |
+| BLE | `flutter_blue_plus` + `permission_handler` | GATT central: scan, secure pair/bond, notify/write, reconnect ([BLE integration](BLE_INTEGRATION.md)) |
 | State management | `provider` (ChangeNotifier) | Services are notifiers provided app-wide; UI only watches |
-| Map | `flutter_map` + `latlong2` | Keyless Esri canvas tiles (dark/light); OSM/Google swap is a URL string |
+| Map | `flutter_map` + `latlong2` | Keyless Esri canvas tiles (dark/light); simulation source only — live BLE uses a polar relative radar |
 | Charts | `fl_chart` | Distance timeline with loss band |
 | Audio | `audioplayers` | Bundled alarm WAVs, preview + alert playback, fail-safe on web |
 | Persistence | `shared_preferences` | Session, settings, onboarding flag |
@@ -46,9 +47,14 @@ replace the simulation without touching UI code.
                            │ watches ChangeNotifier state only
 ┌──────────────────────────▼────────────────────────────────────┐
 │ services/                                                     │
-│  SimulationEngine    fused tracking pipeline, thresholds,     │
-│                      panic mode, event + history records      │
-│  ScenarioDirector    scripted movie-mode, captions, speed     │
+│  ble/  Esp32BleService  GATT scan/pair/notify/write/reconnect │
+│        RssiModel        firmware-identical RSSI DSP + pathloss│
+│        telemetry        T-frame / STAT / settings parsers     │
+│  tracking/  TrackingEngine interface                          │
+│        BleTrackingEngine   real RSSI/link → 6-state machine   │
+│        SimulationEngine    deterministic Cairo-walk source    │
+│        TrackingController  source switch, notification forward│
+│  ScenarioDirector    scripted movie-mode (simulation source)  │
 │  AuthService (mock)  signup → OTP → session persistence       │
 │  SettingsService     theme · sound · intervals (persisted)    │
 │  SoundService        alarm playback                           │
@@ -136,9 +142,10 @@ appends to it live.
 
 ## 6. Swapping mocks for production
 
-| Mock (today) | Production (roadmap) | Swap cost |
+| Component (today) | Production (roadmap) | Swap cost |
 |---|---|---|
-| `SimulationEngine` | Platform channels: phone GPS + radio RSSI stream; bag GPS + telemetry arrive over the radio link. Engine's phase machine and thresholds survive unchanged — only the pose/radio inputs become real. | UI: zero |
+| `Esp32BleService` + `BleTrackingEngine` — **real GATT link and RSSI pipeline** | Add GPS-bearing hardware; the `TrackingEngine` phase machine and thresholds survive unchanged — only inputs extend | UI: zero |
+| `SimulationEngine` | Offline/QA source retained; no production role | — |
 | `AuthService` (mock) | `supabase_flutter` — `signInWithOtp` / `verifyOTP` / `signInWithPassword` match the same `signup → otp → session` contract | Re-implement one interface |
 | Keyless Esri tiles | Self-hosted tile server or Google Maps | One `urlTemplate` string |
 | Local history | Postgres `events` / `distance_samples` + Realtime relay when phone offline | Repository layer |

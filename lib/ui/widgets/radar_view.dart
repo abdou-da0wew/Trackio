@@ -3,16 +3,24 @@ import 'package:flutter/material.dart';
 import '../../core/palette.dart';
 
 /// Animated radar sweep for the dashboard hero card.
-/// Blip radius maps the phone↔bag distance (log scale, 5–500 m).
+///
+/// Simulation source: blip radius maps the phone↔bag distance on a log
+/// scale (4–500 m) at a fixed angle. Live BLE source: pass [bearingDeg]
+/// (servo space, 90° = ahead) and [rangeMaxM] for a linear, real-direction
+/// blip driven by the module's radar sweep.
 class RadarView extends StatefulWidget {
   final double distanceM;
   final Color statusColor;
   final bool panic;
+  final double? bearingDeg;
+  final double? rangeMaxM;
   const RadarView({
     super.key,
     required this.distanceM,
     required this.statusColor,
     this.panic = false,
+    this.bearingDeg,
+    this.rangeMaxM,
   });
 
   @override
@@ -40,6 +48,8 @@ class _RadarViewState extends State<RadarView> with SingleTickerProviderStateMix
           distanceM: widget.distanceM,
           statusColor: widget.statusColor,
           panic: widget.panic,
+          bearingDeg: widget.bearingDeg,
+          rangeMaxM: widget.rangeMaxM,
           dark: Theme.of(context).brightness == Brightness.dark,
         ),
         size: Size.infinite,
@@ -54,12 +64,16 @@ class _RadarPainter extends CustomPainter {
   final Color statusColor;
   final bool panic;
   final bool dark;
+  final double? bearingDeg;
+  final double? rangeMaxM;
   _RadarPainter({
     required this.progress,
     required this.distanceM,
     required this.statusColor,
     required this.panic,
     required this.dark,
+    this.bearingDeg,
+    this.rangeMaxM,
   });
 
   @override
@@ -102,11 +116,17 @@ class _RadarPainter extends CustomPainter {
     canvas.drawLine(c, edge, Paint()..color = accent.withValues(alpha: .8)..strokeWidth = 2);
     final dotStroke = dark ? Colors.white : SmartBlue.c100;
 
-    // blip radius: log mapping 5..500 m → .18..1.0
-    final t = ((math.log(distanceM) - math.log(4)) /
-            (math.log(500) - math.log(4)))
-        .clamp(0.0, 1.0)
-        .toDouble();
+    // blip radius: linear 0..rangeMaxM for live BLE, otherwise the
+    // original log mapping 4..500 m.
+    final double t;
+    if (rangeMaxM != null) {
+      t = (distanceM / rangeMaxM!).clamp(0.05, 1.0).toDouble();
+    } else {
+      t = ((math.log(distanceM <= 0 ? 0.1 : distanceM) - math.log(4)) /
+              (math.log(500) - math.log(4)))
+          .clamp(0.0, 1.0)
+          .toDouble();
+    }
     final blipR = rMax * (0.2 + 0.8 * t);
 
     // panic halo
@@ -116,8 +136,11 @@ class _RadarPainter extends CustomPainter {
           Paint()..color = statusColor.withValues(alpha: .16 * (1 - pulse)));
     }
 
-    // target ring + bag blip
-    final blip = Offset(c.dx + blipR * math.cos(-0.9), c.dy + blipR * math.sin(-0.9));
+    // target ring + bag blip (real bearing from the BLE radar when known)
+    final blipAngle = bearingDeg == null
+        ? -0.9
+        : (bearingDeg! - 90) * math.pi / 180;
+    final blip = Offset(c.dx + blipR * math.sin(blipAngle), c.dy - blipR * math.cos(blipAngle));
     canvas.drawCircle(blip, 11, Paint()..color = statusColor.withValues(alpha: .25));
     canvas.drawCircle(blip, 5.5, Paint()..color = statusColor);
     canvas.drawCircle(blip, 5.5, Paint()..style = PaintingStyle.stroke..strokeWidth = 2..color = dotStroke.withValues(alpha: .95));
@@ -130,5 +153,6 @@ class _RadarPainter extends CustomPainter {
   @override
   bool shouldRepaint(_RadarPainter old) =>
       old.progress != progress || old.distanceM != distanceM ||
-      old.panic != panic || old.dark != dark;
+      old.panic != panic || old.dark != dark ||
+      old.bearingDeg != bearingDeg || old.rangeMaxM != rangeMaxM;
 }

@@ -4,14 +4,14 @@ import '../../core/palette.dart';
 import '../../core/theme.dart';
 import '../../core/l10n_text.dart';
 import '../../models/models.dart';
-import '../../services/simulation_engine.dart';
+import '../../services/tracking/tracking_engine.dart';
 import 'common.dart';
 
 /// Full-screen alert layer shown while a loss event is active.
 /// Stays mounted inside the shell stack; visibility is driven by
-/// [SimulationEngine.lostAlertActive].
+/// [TrackingEngine.lostAlertActive].
 class AlertOverlay extends StatefulWidget {
-  final SimulationEngine engine;
+  final TrackingEngine engine;
   final VoidCallback onOpenMap;
   const AlertOverlay({super.key, required this.engine, required this.onOpenMap});
 
@@ -50,7 +50,7 @@ class _AlertOverlayState extends State<AlertOverlay> with SingleTickerProviderSt
 }
 
 class _AlertBody extends StatelessWidget {
-  final SimulationEngine engine;
+  final TrackingEngine engine;
   final VoidCallback onOpenMap;
   final AnimationController anim;
   const _AlertBody({super.key, required this.engine, required this.onOpenMap, required this.anim});

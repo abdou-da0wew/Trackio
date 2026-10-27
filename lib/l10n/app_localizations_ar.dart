@@ -597,4 +597,153 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get capFound => 'تم استرداد الحقيبة';
+
+  @override
+  String get connectTitle => 'وصّل وحدة Trackio';
+
+  @override
+  String connectSubtitle(String name) {
+    return 'شغّل وحدة ESP32 ثم اخترها بالأسفل. تظهر باسم $name.';
+  }
+
+  @override
+  String get connectPasskeyTitle => 'مفتاح الاقتران';
+
+  @override
+  String connectPasskeyBody(String passkey) {
+    return 'عند ظهور مطالبة الاقتران، أدخل المفتاح $passkey.';
+  }
+
+  @override
+  String get connectScan => 'ابحث عن الأجهزة';
+
+  @override
+  String get connectScanning => 'جارٍ البحث عن الوحدات…';
+
+  @override
+  String get connectNoDevices => 'لم تُعثر على وحدات';
+
+  @override
+  String get connectNoDevicesHint =>
+      'تأكد من تشغيل الوحدة وأن مؤشرها الضوئي يومض.';
+
+  @override
+  String get connectUnsupported =>
+      'البلوتوث غير مدعوم على هذا الجهاز أو المتصفح.';
+
+  @override
+  String get connectBluetoothOff => 'البلوتوث مغلق';
+
+  @override
+  String get connectTurnOn => 'تشغيل البلوتوث';
+
+  @override
+  String get connectPermissionTitle => 'يلزم إذن البلوتوث';
+
+  @override
+  String get connectGrantPermission => 'منح الإذن';
+
+  @override
+  String get connectPairing =>
+      'جارٍ الاقتران… أدخل المفتاح الظاهر على وحدتك عند مطالبة النظام';
+
+  @override
+  String connectConnecting(String name) {
+    return 'جارٍ الاتصال بـ $name…';
+  }
+
+  @override
+  String connectReconnecting(int n) {
+    return 'انقطع الرابط · جارٍ إعادة الاتصال (المحاولة $n)';
+  }
+
+  @override
+  String get connectConnected => 'تم الاتصال · تدفق القياسات الحية جارٍ';
+
+  @override
+  String get connectRetry => 'إعادة المحاولة';
+
+  @override
+  String get connectOpenTracker => 'فتح التتبع المباشر';
+
+  @override
+  String get connectContinueSim => 'استكشاف بدون عتاد';
+
+  @override
+  String get connectSimNote =>
+      'وضع المحاكاة يستبدل الرابط اللاسلكي بمحرك تجريبي حتمي.';
+
+  @override
+  String get connectForget => 'نسيان هذه الوحدة';
+
+  @override
+  String connectLastModule(String name) {
+    return 'آخر وحدة مقترنة: $name';
+  }
+
+  @override
+  String get connectSearchHint =>
+      'تعمل الوحدة كخادم GATT برابط آمن ومحفوظ الاقتران.';
+
+  @override
+  String get devicePanelTitle => 'وحدة التتبع';
+
+  @override
+  String get devicePing => 'اختبار الاتصال';
+
+  @override
+  String get deviceStatus => 'الحالة الكاملة';
+
+  @override
+  String get deviceVersion => 'إصدار البرنامج';
+
+  @override
+  String get deviceReadSettings => 'قراءة الإعدادات';
+
+  @override
+  String get deviceDisconnect => 'قطع الاتصال';
+
+  @override
+  String get deviceReconnect => 'إعادة الاتصال';
+
+  @override
+  String get deviceResponseLog => 'ردود الوحدة';
+
+  @override
+  String get deviceEmptyLog => 'لا ردود بعد — أرسل أمرًا.';
+
+  @override
+  String get bleWiredPower => 'تغذية سلكية';
+
+  @override
+  String get bleNoLink => 'لا يوجد رابط لاسلكي';
+
+  @override
+  String get bleBearing => 'الاتجاه';
+
+  @override
+  String get bleConfidence => 'درجة الثقة';
+
+  @override
+  String get relativeMapTitle => 'رادار نسبي';
+
+  @override
+  String get relativeMapHint =>
+      'لا تملك الوحدة GPS — يأتي الاتجاه والمسافة من مسح رادار البلوتوث.';
+
+  @override
+  String get evBleLinkUp => 'تأسس رابط البلوتوث · القناة الآمنة نشطة';
+
+  @override
+  String evBleTelemetry(String accuracy) {
+    return 'إطار قياسات حي · الدقة ±$accuracy م';
+  }
+
+  @override
+  String evBleWeakLink(int rssi) {
+    return 'رابط لاسلكي ضعيف · $rssi ديسيبل مللي واط';
+  }
+
+  @override
+  String get settingsTracker => 'وحدة التتبع';
 }

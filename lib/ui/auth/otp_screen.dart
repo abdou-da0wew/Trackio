@@ -72,7 +72,7 @@ class _OtpScreenState extends State<OtpScreen> with SingleTickerProviderStateMix
     final ok = await auth.verifyOtp(_code);
     if (!mounted) return;
     if (ok) {
-      Navigator.pushNamedAndRemoveUntil(context, '/shell', (_) => false);
+      Navigator.pushNamedAndRemoveUntil(context, '/connect', (_) => false);
     } else {
       setState(() {
         _busy = false;

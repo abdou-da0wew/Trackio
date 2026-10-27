@@ -1,5 +1,5 @@
 name: trackio
-description: "Trackio — smart bag tracking demo client (Android + iOS)."
+description: "Trackio — smart bag tracking with a live ESP32 BLE link (Android, iOS, web)."
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -21,6 +21,10 @@ dependencies:
   audioplayers: ^6.8.1
   shared_preferences: ^2.5.6
   intl: ^0.20.2
+  # Real ESP32 bag-module link (GATT central: scan, secure pair, telemetry).
+  flutter_blue_plus: ^1.32.0
+  # Runtime BLE/location permission requests (Android 12+ BLE perms, pre-31 location).
+  permission_handler: ^11.3.1
 
 dev_dependencies:
   flutter_test:

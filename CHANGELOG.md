@@ -19,6 +19,51 @@ semantic versioning.
 
 ### Added
 
+- **Real ESP32 BLE link — the tracking pipeline is no longer a
+  simulation.** The app connects to the ESP32 follow-car firmware over
+  GATT (`flutter_blue_plus`): service `f7a90001-…`, encrypted command /
+  telemetry / response characteristics, LE Secure Connections pairing
+  with the firmware's static passkey `246810`, MTU 220, and automatic
+  exponential-backoff reconnect. A new connect gate handles scan,
+  pairing, link status and "explore without hardware" fallback.
+- **`lib/services/ble/` transport layer** — `Esp32BleService` (scan,
+  secure connect/bond, notify subscriptions, command writes, reconnect),
+  `TelemetryFrame` / `StatResponse` / settings-dump parsers for the
+  exact firmware wire formats, and `RssiModel`: a 1:1 Dart port of the
+  firmware's median-3 + EMA RSSI filter and log-distance path-loss model
+  (`rssi1m −59`, `n 2.6`, clamp 0.15–25 m).
+- **`BleTrackingEngine`** — the same six-state tracking machine
+  (tracking → warning → lost → panic → recovering → found) driven by
+  real RSSI/link events: −82 dBm warning, −94 dBm sustained / disconnect
+  / stale-frame loss, reconnect recovery, explicit "I found my bag"
+  confirmation. A `TrackingEngine` interface + `TrackingController` now
+  switch between the live BLE source and the deterministic simulation
+  without touching the UI.
+- **Relative radar map** — because the module reports bearing and
+  distance but no GPS, BLE mode renders a live polar radar
+  (`RelativeRadarMap`, dashboard mini-view + full map) instead of
+  invented map coordinates; wired-power and no-battery are shown
+  honestly, with bearing/confidence chips on the dashboard.
+- **Device control panel** — live link phase, `PING` / `VER` / `STAT` /
+  `GET ALL` diagnostics, `MODE` / `ARM` follow-car commands and a
+  streaming module response log.
+- **Permissions & platform config** — Android 12+ BLE runtime
+  permissions (legacy location fallback), `minSdk` 23, iOS
+  `NSBluetoothAlwaysUsageDescription`.
+- **Tests** — `test/rssi_model_test.dart` mirrors the firmware host
+  tests and covers telemetry/STAT/settings parsing.
+- **Docs** — `docs/BLE_INTEGRATION.md` maps every firmware field and
+  GATT characteristic to its app-side use.
+
+### Changed
+
+- Post-login routing now passes through the device-connection gate
+  (`/connect`); the simulation is an explicit offline/QA choice rather
+  than the default, and `?shot=` QA deep links continue to stage the
+  simulation engine deterministically.
+
+### Added (localization)
+
 - **Full Arabic localization (RTL)** via Flutter's official `gen_l10n`
   pipeline: `l10n.yaml`, `.arb` bundles in `lib/l10n/`, generated
   `AppLocalizations` wired into `MaterialApp` with `supportedLocales: [en, ar]`

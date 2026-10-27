@@ -3,12 +3,12 @@ import 'package:trackio/l10n/app_localizations.dart';
 
 import '../models/models.dart';
 import '../services/settings_service.dart';
-import '../services/simulation_engine.dart';
+import '../services/tracking/tracking_engine.dart';
 
 export 'package:trackio/l10n/app_localizations.dart' show AppLocalizations;
 
 /// Rendering helpers that turn locale-free engine/model state into
-/// localized strings. The simulation layer never touches AppLocalizations —
+/// localized strings. The tracking layer never touches AppLocalizations —
 /// every user-visible sentence is resolved here, in the UI layer.
 extension AppLocalizationsX on AppLocalizations {
   /// Localized distance: "12 m" / "1.4 km" (locale-aware units).
@@ -78,12 +78,17 @@ extension AppLocalizationsX on AppLocalizations {
         'recoveryStarted' => evRecoveryStarted,
         'recoveryConfirmed' => evRecoveryConfirmed(e.params['meters']! as int),
         'motionChanged' => evMotionChanged,
+        // Live BLE engine codes.
+        'bleLinkUp' => evBleLinkUp,
+        'bleTelemetry' => evBleTelemetry(e.params['accuracy']! as String),
+        'bleWeakLink' => evBleWeakLink(e.params['rssi']! as int),
         _ => e.code,
       };
 
   /// Localized demo "movie mode" caption, resolved from the machine-readable
-  /// [SimulationEngine.scenarioPhase] (with live parameters where needed).
-  String scenarioCaption(SimulationEngine e) => switch (e.scenarioPhase) {
+  /// [TrackingEngine.scenarioPhase] (with live parameters where needed).
+  /// Only the simulation engine emits phases.
+  String scenarioCaption(TrackingEngine e) => switch (e.scenarioPhase) {
         'intro' => capIntro,
         'drifting' => capDrifting,
         'leftBehind' => capLeftBehind,

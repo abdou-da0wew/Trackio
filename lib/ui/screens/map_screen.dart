@@ -9,8 +9,11 @@ import '../../core/theme.dart';
 import '../../core/l10n_text.dart';
 import '../../services/settings_service.dart';
 import '../../services/simulation_engine.dart';
+import '../../services/tracking/tracking_controller.dart';
+import '../../services/tracking/tracking_engine.dart';
 import '../widgets/common.dart';
 import '../widgets/map_markers.dart';
+import '../widgets/relative_radar_map.dart';
 
 class MapScreen extends StatefulWidget {
   final VoidCallback onDemo;
@@ -20,6 +23,112 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
+  @override
+  Widget build(BuildContext context) {
+    final controller = context.watch<TrackingController>();
+    final engine = controller.engine;
+    return engine.isLive
+        ? _RelativeMapScaffold(engine: engine, onDemo: widget.onDemo)
+        : _GeoMapScaffold(
+            engine: engine as SimulationEngine,
+            onDemo: widget.onDemo,
+          );
+  }
+}
+
+/// Live BLE source: polar radar — the module reports no GPS coordinates.
+class _RelativeMapScaffold extends StatelessWidget {
+  final TrackingEngine engine;
+  final VoidCallback onDemo;
+  const _RelativeMapScaffold({required this.engine, required this.onDemo});
+
+  @override
+  Widget build(BuildContext context) {
+    final tk = tkOf(context);
+    final l = l10nOf(context);
+    final st = StatusTheme.of(engine.status);
+
+    return Scaffold(
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: AnimatedBuilder(
+              animation: engine,
+              builder: (context, _) => RelativeRadarMap(
+                distanceM: engine.distance,
+                bearingDeg: engine.bearingDeg,
+                confidence: engine.bearingConfidence,
+                statusColor: st.color,
+                panic: engine.inDanger,
+              ),
+            ),
+          ),
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+              child: Row(
+                children: [
+                  AnimatedBuilder(
+                    animation: engine,
+                    builder: (context, _) => Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: tk.card.withValues(alpha: .94),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: tk.stroke),
+                        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: .25), blurRadius: 18)],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          StatusPill(status: engine.status, pulse: engine.inDanger),
+                          const SizedBox(width: 10),
+                          Text(
+                            l.dist(engine.distance),
+                            style: GoogleFonts.rubik(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                              color: tk.textPrimary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const Spacer(),
+                  IconButton2(
+                    icon: Icons.bluetooth_rounded,
+                    bg: tk.card.withValues(alpha: .94),
+                    onTap: onDemo,
+                    tooltip: l.devicePanelTitle,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Positioned(
+            left: 16,
+            right: 16,
+            bottom: 16,
+            child: _LiveBagCard(engine: engine),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Simulation source: the original geographic Esri-tile map.
+class _GeoMapScaffold extends StatefulWidget {
+  final SimulationEngine engine;
+  final VoidCallback onDemo;
+  const _GeoMapScaffold({required this.engine, required this.onDemo});
+
+  @override
+  State<_GeoMapScaffold> createState() => _GeoMapScaffoldState();
+}
+
+class _GeoMapScaffoldState extends State<_GeoMapScaffold> {
   final MapController _map = MapController();
   bool _follow = false;
 
@@ -36,7 +145,7 @@ class _MapScreenState extends State<MapScreen> {
   Widget build(BuildContext context) {
     final tk = tkOf(context);
     final l = l10nOf(context);
-    final engine = context.watch<SimulationEngine>();
+    final engine = widget.engine;
     final settings = context.watch<SettingsService>();
     final st = StatusTheme.of(engine.status);
     final dark = settings.themeDark;
@@ -71,7 +180,7 @@ class _MapScreenState extends State<MapScreen> {
               children: [
                 TileLayer(
                   urlTemplate: url,
-                  userAgentPackageName: 'app.trackio.demo',
+                  userAgentPackageName: 'app.trackio',
                 ),
                 PolylineLayer(
                   polylines: [
@@ -248,66 +357,89 @@ class _MapScreenState extends State<MapScreen> {
             left: 16,
             right: 16,
             bottom: 16,
-            child: TkCard(
-              padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
-              child: AnimatedBuilder(
-                animation: engine,
-                builder: (context, _) {
-                  final b = engine.bag;
-                  return Row(
-                    children: [
-                      Container(
-                        width: 46,
-                        height: 46,
-                        decoration: BoxDecoration(
-                          color: st.color.withValues(alpha: .13),
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        child: Icon(Icons.backpack_rounded, color: st.color, size: 22),
-                      ),
-                      const SizedBox(width: 13),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              b.name,
-                              style: GoogleFonts.rubik(fontSize: 14.5,
-                                fontWeight: FontWeight.w700,
-                                color: tk.textPrimary,
-                              ),
-                            ),
-                            const SizedBox(height: 3),
-                            Text(
-                              engine.connectionCut
-                                  ? l.mapSignalLost(engine.radioRetries)
-                                  : l.bagFixLine(
-                                      engine.bagAccuracyM < 0 ? '—' : engine.bagAccuracyM.toStringAsFixed(1),
-                                      Fmt.rssi(b.rssi),
-                                      b.batteryPct.round()),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(fontSize: 11.5, color: tk.textTertiary),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      IconButton2(
-                        icon: Icons.notifications_active_rounded,
-                        fg: tk.accent,
-                        onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(l.buzzQueued)),
-                        ),
-                        tooltip: l.ringTag,
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ),
+            child: _LiveBagCard(engine: engine),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Bottom module card shared by both map sources.
+class _LiveBagCard extends StatelessWidget {
+  final TrackingEngine engine;
+  const _LiveBagCard({required this.engine});
+
+  @override
+  Widget build(BuildContext context) {
+    final tk = tkOf(context);
+    final l = l10nOf(context);
+    final st = StatusTheme.of(engine.status);
+    return TkCard(
+      padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
+      child: AnimatedBuilder(
+        animation: engine,
+        builder: (context, _) {
+          final b = engine.bag;
+          final subtitle = engine.isLive
+              ? (engine.connectionCut
+                  ? l.mapSignalLost(engine.radioRetries)
+                  : [
+                      Fmt.rssi(b.rssi),
+                      if (engine.bearingDeg != null) '${l.bleBearing} ${engine.bearingDeg!.round()}°',
+                      if (engine.bearingConfidence > 0) '${l.bleConfidence} ${engine.bearingConfidence}%',
+                      l.bleWiredPower,
+                    ].join('  ·  '))
+              : l.bagFixLine(
+                  engine.bagAccuracyM < 0 ? '—' : engine.bagAccuracyM.toStringAsFixed(1),
+                  Fmt.rssi(b.rssi),
+                  b.batteryPct.round(),
+                );
+          return Row(
+            children: [
+              Container(
+                width: 46,
+                height: 46,
+                decoration: BoxDecoration(
+                  color: st.color.withValues(alpha: .13),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Icon(Icons.bluetooth_rounded, color: st.color, size: 22),
+              ),
+              const SizedBox(width: 13),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      b.name,
+                      style: GoogleFonts.rubik(fontSize: 14.5,
+                        fontWeight: FontWeight.w700,
+                        color: tk.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      subtitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontSize: 11.5, color: tk.textTertiary),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 10),
+              IconButton2(
+                icon: Icons.notifications_active_rounded,
+                fg: tk.accent,
+                onTap: () => ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(l.buzzQueued)),
+                ),
+                tooltip: l.ringTag,
+              ),
+            ],
+          );
+        },
       ),
     );
   }

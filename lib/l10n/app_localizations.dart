@@ -1159,6 +1159,135 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Bag recovered'**
   String get capFound;
+
+  /// No description provided for @connectTitle.
+  String get connectTitle;
+
+  /// No description provided for @connectSubtitle.
+  String connectSubtitle(String name);
+
+  /// No description provided for @connectPasskeyTitle.
+  String get connectPasskeyTitle;
+
+  /// No description provided for @connectPasskeyBody.
+  String connectPasskeyBody(String passkey);
+
+  /// No description provided for @connectScan.
+  String get connectScan;
+
+  /// No description provided for @connectScanning.
+  String get connectScanning;
+
+  /// No description provided for @connectNoDevices.
+  String get connectNoDevices;
+
+  /// No description provided for @connectNoDevicesHint.
+  String get connectNoDevicesHint;
+
+  /// No description provided for @connectUnsupported.
+  String get connectUnsupported;
+
+  /// No description provided for @connectBluetoothOff.
+  String get connectBluetoothOff;
+
+  /// No description provided for @connectTurnOn.
+  String get connectTurnOn;
+
+  /// No description provided for @connectPermissionTitle.
+  String get connectPermissionTitle;
+
+  /// No description provided for @connectGrantPermission.
+  String get connectGrantPermission;
+
+  /// No description provided for @connectPairing.
+  String get connectPairing;
+
+  /// No description provided for @connectConnecting.
+  String connectConnecting(String name);
+
+  /// No description provided for @connectReconnecting.
+  String connectReconnecting(int n);
+
+  /// No description provided for @connectConnected.
+  String get connectConnected;
+
+  /// No description provided for @connectRetry.
+  String get connectRetry;
+
+  /// No description provided for @connectOpenTracker.
+  String get connectOpenTracker;
+
+  /// No description provided for @connectContinueSim.
+  String get connectContinueSim;
+
+  /// No description provided for @connectSimNote.
+  String get connectSimNote;
+
+  /// No description provided for @connectForget.
+  String get connectForget;
+
+  /// No description provided for @connectLastModule.
+  String connectLastModule(String name);
+
+  /// No description provided for @connectSearchHint.
+  String get connectSearchHint;
+
+  /// No description provided for @devicePanelTitle.
+  String get devicePanelTitle;
+
+  /// No description provided for @devicePing.
+  String get devicePing;
+
+  /// No description provided for @deviceStatus.
+  String get deviceStatus;
+
+  /// No description provided for @deviceVersion.
+  String get deviceVersion;
+
+  /// No description provided for @deviceReadSettings.
+  String get deviceReadSettings;
+
+  /// No description provided for @deviceDisconnect.
+  String get deviceDisconnect;
+
+  /// No description provided for @deviceReconnect.
+  String get deviceReconnect;
+
+  /// No description provided for @deviceResponseLog.
+  String get deviceResponseLog;
+
+  /// No description provided for @deviceEmptyLog.
+  String get deviceEmptyLog;
+
+  /// No description provided for @bleWiredPower.
+  String get bleWiredPower;
+
+  /// No description provided for @bleNoLink.
+  String get bleNoLink;
+
+  /// No description provided for @bleBearing.
+  String get bleBearing;
+
+  /// No description provided for @bleConfidence.
+  String get bleConfidence;
+
+  /// No description provided for @relativeMapTitle.
+  String get relativeMapTitle;
+
+  /// No description provided for @relativeMapHint.
+  String get relativeMapHint;
+
+  /// No description provided for @evBleLinkUp.
+  String get evBleLinkUp;
+
+  /// No description provided for @evBleTelemetry.
+  String evBleTelemetry(String accuracy);
+
+  /// No description provided for @evBleWeakLink.
+  String evBleWeakLink(int rssi);
+
+  /// No description provided for @settingsTracker.
+  String get settingsTracker;
 }
 
 class _AppLocalizationsDelegate

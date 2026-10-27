@@ -83,20 +83,32 @@ class BagDevice {
   final double batteryPct;
   final double rssi; // dBm; -100 when radio link is cut
   final bool radioLink;
+
+  /// False for the wired ESP32 module, which reports no battery telemetry.
+  final bool batteryAvailable;
   BagDevice({
     required this.name,
     required this.firmware,
     required this.batteryPct,
     required this.rssi,
     required this.radioLink,
+    this.batteryAvailable = true,
   });
 
-  BagDevice copyWith({double? batteryPct, double? rssi, bool? radioLink}) => BagDevice(
-        name: name,
-        firmware: firmware,
+  BagDevice copyWith({
+    double? batteryPct,
+    double? rssi,
+    bool? radioLink,
+    String? name,
+    String? firmware,
+  }) =>
+      BagDevice(
+        name: name ?? this.name,
+        firmware: firmware ?? this.firmware,
         batteryPct: batteryPct ?? this.batteryPct,
         rssi: rssi ?? this.rssi,
         radioLink: radioLink ?? this.radioLink,
+        batteryAvailable: batteryAvailable,
       );
 }
 

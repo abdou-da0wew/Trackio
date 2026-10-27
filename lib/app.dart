@@ -5,9 +5,10 @@ import 'core/theme.dart';
 import 'l10n/app_localizations.dart';
 import 'services/mock_auth_service.dart';
 import 'services/settings_service.dart';
-import 'services/simulation_engine.dart';
+import 'services/tracking/tracking_controller.dart';
 import 'ui/auth/login_signup.dart';
 import 'ui/auth/otp_screen.dart';
+import 'ui/screens/connect_screen.dart';
 import 'ui/screens/onboarding_screen.dart';
 import 'ui/screens/shell_screen.dart';
 import 'ui/screens/splash_screen.dart';
@@ -58,6 +59,7 @@ class TrackioApp extends StatelessWidget {
         '/login': (_) => const LoginScreen(),
         '/signup': (_) => const SignupScreen(),
         '/otp': (_) => const OtpScreen(),
+        '/connect': (_) => const ConnectScreen(),
         '/shell': (_) => const ShellScreen(),
       },
     );
@@ -110,7 +112,9 @@ class _SplashRouterState extends State<_SplashRouter> {
     final auth = context.read<AuthService>();
     final settings = context.read<SettingsService>();
     if (auth.user != null) {
-      Navigator.pushReplacementNamed(context, '/shell');
+      // Signed-in sessions pass through the device-connection gate; the
+      // connect screen forwards straight to the shell when already linked.
+      Navigator.pushReplacementNamed(context, '/connect');
     } else {
       Navigator.pushReplacementNamed(
         context,
@@ -124,6 +128,7 @@ class _SplashRouterState extends State<_SplashRouter> {
 }
 
 /// Jumps straight to a screen with a deterministic engine pose.
+/// QA staging always runs on the simulation source.
 class _ShotLauncher extends StatefulWidget {
   final String target;
   final String state;
@@ -142,8 +147,9 @@ class _ShotLauncherState extends State<_ShotLauncher> {
         await auth.login(email: 'demo@trackio.app');
       }
       if (!mounted) return;
-      final engine = context.read<SimulationEngine>();
-      engine.poseForShot(widget.state);
+      final controller = context.read<TrackingController>();
+      controller.useSimulation();
+      controller.simulation.poseForShot(widget.state);
       if (!mounted) return;
       const tabByTarget = {
         'home': 0, 'map': 1, 'history': 2, 'settings': 3,

@@ -11,10 +11,13 @@ import '../../models/models.dart';
 import '../../services/mock_auth_service.dart';
 import '../../services/settings_service.dart';
 import '../../services/simulation_engine.dart';
+import '../../services/tracking/tracking_controller.dart';
+import '../../services/tracking/tracking_engine.dart';
 import '../../services/sound_service.dart';
 import '../widgets/common.dart';
 import '../widgets/map_markers.dart';
 import '../widgets/radar_view.dart';
+import '../widgets/relative_radar_map.dart';
 
 class DashboardScreen extends StatelessWidget {
   final VoidCallback onGoMap;
@@ -28,7 +31,8 @@ class DashboardScreen extends StatelessWidget {
     final auth = context.watch<AuthService>();
     final settings = context.read<SettingsService>();
     final sound = context.read<SoundService>();
-    final engine = context.read<SimulationEngine>();
+    final controller = context.watch<TrackingController>();
+    final engine = controller.engine;
 
     return Scaffold(
       body: SafeArea(
@@ -88,8 +92,8 @@ class DashboardScreen extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: _QuickAction(
-                    icon: Icons.science_rounded,
-                    label: l.demoMode,
+                    icon: engine.isLive ? Icons.bluetooth_rounded : Icons.science_rounded,
+                    label: engine.isLive ? l.devicePanelTitle : l.demoMode,
                     onTap: onDemo,
                   ),
                 ),
@@ -97,9 +101,9 @@ class DashboardScreen extends StatelessWidget {
             ),
             const SizedBox(height: 18),
 
-            // mini map preview
+            // mini map / relative radar preview
             SectionLabel(
-              l.livePosition,
+              engine.isLive ? l.relativeMapTitle : l.livePosition,
               trailing: GestureDetector(
                 onTap: onGoMap,
                 child: Row(
@@ -117,7 +121,9 @@ class DashboardScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
                 child: SizedBox(
                   height: 158,
-                  child: _MiniMap(engine: engine, dark: settings.themeDark),
+                  child: engine.isLive
+                      ? _MiniRadar(engine: engine)
+                      : _MiniMap(engine: engine as SimulationEngine, dark: settings.themeDark),
                 ),
               ),
             ),
@@ -143,7 +149,7 @@ class DashboardScreen extends StatelessWidget {
 
 /// Hero radar card — the only dashboard section that rebuilds per engine tick.
 class _LiveRadarCard extends StatelessWidget {
-  final SimulationEngine engine;
+  final TrackingEngine engine;
   const _LiveRadarCard({required this.engine});
 
   @override
@@ -154,6 +160,7 @@ class _LiveRadarCard extends StatelessWidget {
       builder: (context, _) {
         final tk = tkOf(context);
         final st = StatusTheme.of(engine.status);
+        final linkDown = engine.connectionCut;
         return TkCard(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
@@ -185,6 +192,8 @@ class _LiveRadarCard extends StatelessWidget {
                     distanceM: engine.distance,
                     statusColor: st.color,
                     panic: engine.inDanger,
+                    bearingDeg: engine.bearingDeg,
+                    rangeMaxM: engine.isLive ? 25 : null,
                   ),
                 ),
               ),
@@ -219,14 +228,16 @@ class _LiveRadarCard extends StatelessWidget {
                     AnimatedSwitcher(
                       duration: const Duration(milliseconds: 240),
                       child: Text(
-                        engine.connectionCut
-                            ? l.radioLinkDown(engine.radioRetries)
+                        linkDown
+                            ? (engine.everConnected
+                                ? l.radioLinkDown(engine.radioRetries)
+                                : l.bleNoLink)
                             : l.fromYourBag,
-                        key: ValueKey(engine.connectionCut),
+                        key: ValueKey('$linkDown-${engine.everConnected}'),
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 12.5,
-                          color: engine.connectionCut ? Semantic.warning : tk.textTertiary,
+                          color: linkDown ? Semantic.warning : tk.textTertiary,
                         ),
                       ),
                     ),
@@ -237,15 +248,20 @@ class _LiveRadarCard extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
+                  // The ESP32 module is wired-powered and reports no battery.
                   MetricChip(
-                    icon: Icons.battery_5_bar_rounded,
-                    label: '${engine.bag.batteryPct.round()}%',
-                    tint: engine.bag.batteryPct < 20 ? Semantic.warning : tk.textSecondary,
+                    icon: engine.hasBattery ? Icons.battery_5_bar_rounded : Icons.power_rounded,
+                    label: engine.hasBattery
+                        ? '${engine.bag.batteryPct.round()}%'
+                        : l.bleWiredPower,
+                    tint: engine.hasBattery && engine.bag.batteryPct < 20
+                        ? Semantic.warning
+                        : tk.textSecondary,
                   ),
                   MetricChip(
                     icon: Icons.wifi_tethering_rounded,
-                    label: engine.connectionCut ? l.linkLost : Fmt.rssi(engine.bag.rssi),
-                    tint: engine.connectionCut ? Semantic.danger : null,
+                    label: linkDown ? l.linkLost : Fmt.rssi(engine.bag.rssi),
+                    tint: linkDown ? Semantic.danger : null,
                   ),
                   MetricChip(
                     icon: Icons.gps_fixed_rounded,
@@ -253,6 +269,17 @@ class _LiveRadarCard extends StatelessWidget {
                   ),
                 ],
               ),
+              if (engine.isLive && engine.bearingDeg != null) ...[
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _BearingPill(label: l.bleBearing, value: '${engine.bearingDeg!.round()}°'),
+                    const SizedBox(width: 10),
+                    _BearingPill(label: l.bleConfidence, value: '${engine.bearingConfidence}%'),
+                  ],
+                ),
+              ],
             ],
           ),
         );
@@ -261,9 +288,57 @@ class _LiveRadarCard extends StatelessWidget {
   }
 }
 
+class _BearingPill extends StatelessWidget {
+  final String label;
+  final String value;
+  const _BearingPill({required this.label, required this.value});
+  @override
+  Widget build(BuildContext context) {
+    final tk = tkOf(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+      decoration: BoxDecoration(
+        color: tk.bgDeep.withValues(alpha: .55),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(label, style: TextStyle(fontSize: 11, color: tk.textTertiary)),
+          const SizedBox(width: 6),
+          Text(
+            value,
+            style: GoogleFonts.rubik(fontSize: 12, fontWeight: FontWeight.w700, color: tk.textSecondary),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Live BLE mini view: polar radar instead of a geographic map.
+class _MiniRadar extends StatelessWidget {
+  final TrackingEngine engine;
+  const _MiniRadar({required this.engine});
+  @override
+  Widget build(BuildContext context) {
+    final st = StatusTheme.of(engine.status);
+    return AnimatedBuilder(
+      animation: engine,
+      builder: (context, _) => RelativeRadarMap(
+        distanceM: engine.distance,
+        bearingDeg: engine.bearingDeg,
+        confidence: engine.bearingConfidence,
+        statusColor: st.color,
+        panic: engine.inDanger,
+      ),
+    );
+  }
+}
+
 /// Recent-activity list — isolated rebuild, keeps the static dashboard steady.
 class _RecentEvents extends StatelessWidget {
-  final SimulationEngine engine;
+  final TrackingEngine engine;
   const _RecentEvents({required this.engine});
 
   @override
@@ -361,7 +436,7 @@ class _MiniMap extends StatelessWidget {
           children: [
             TileLayer(
               urlTemplate: url,
-              userAgentPackageName: 'app.trackio.demo',
+              userAgentPackageName: 'app.trackio',
             ),
             PolylineLayer(
               polylines: [

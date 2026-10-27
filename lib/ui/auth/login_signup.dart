@@ -31,7 +31,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final ok = await auth.login(email: email);
     if (!mounted) return;
     if (ok) {
-      Navigator.pushNamedAndRemoveUntil(context, '/shell', (_) => false);
+      Navigator.pushNamedAndRemoveUntil(context, '/connect', (_) => false);
     } else {
       setState(() => _busy = false);
       ScaffoldMessenger.of(context).showSnackBar(
