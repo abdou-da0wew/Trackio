@@ -1,12 +1,12 @@
 <div align="center">
 
-<img src="web/icons/Icon-512.png" alt="Trackio logo" width="88" />
+<img src="assets/brand/trackio_icon.png" alt="Trackio logo — radar sweep locking onto a bag" width="128" />
 
 # Trackio
 
-### One number between you and your bag — fused GPS + radio tracking with instant lost-bag alerts.
+### A live Bluetooth lock on your bag — ESP32 radio distance, radar bearing and instant lost-bag alerts.
 
-**Drift warnings at 30 m. A full-screen alarm at 80 m. Panic packets at 1 Hz. A guided recovery that only ends when you're holding the bag again.**
+**Range warnings at −82 dBm. A full-screen alarm when the link drops. Radar-guided recovery that only ends when you're holding the bag again.**
 
 [![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?style=flat-square&logo=flutter&logoColor=white)](https://flutter.dev)
 [![Dart](https://img.shields.io/badge/Dart-3.x-0175C2?style=flat-square&logo=dart&logoColor=white)](https://dart.dev)
@@ -277,6 +277,16 @@ For BLE issues, include the platform, Android/iOS version, module firmware
 output, and the device panel's response log.
 
 </details>
+
+## Brand assets
+
+The logo is a **radar sweep locking onto a bag**: range rings and a sweep
+wedge behind a rounded bag with a tracking target on its face — a visual
+summary of RSSI distance + radar bearing over the live BLE link. Vector
+sources (`trackio_mark.svg` / `trackio_icon.svg`) and in-app PNGs live in
+[`assets/brand/`](assets/brand/); the reproducible ImageMagick render
+pipeline and per-platform sizing rules are in [`tool/logo/`](tool/logo/).
+Adaptive/monochrome/maskable variants ship for Android, iOS and web.
 
 ## Documentation
 

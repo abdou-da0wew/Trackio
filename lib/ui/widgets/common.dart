@@ -23,7 +23,7 @@ class StatusTheme {
       };
 }
 
-/// Trackio wordmark: radar glyph + Jaro display type (logo face only).
+/// Trackio wordmark: rendered brand mark + Jaro display type (logo face only).
 class TkWordmark extends StatelessWidget {
   final double size;
   final Color? color;
@@ -33,21 +33,33 @@ class TkWordmark extends StatelessWidget {
   Widget build(BuildContext context) {
     final tk = tkOf(context);
     final c = color ?? tk.textPrimary;
+    final tile = size + 8;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: size + 8,
-          height: size + 8,
+          width: tile,
+          height: tile,
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: tk.ctaGradient,
-            ),
             borderRadius: BorderRadius.circular(size * .38),
+            boxShadow: [
+              BoxShadow(
+                color: tk.accent.withValues(alpha: .28),
+                blurRadius: size * .45,
+                offset: Offset(0, size * .14),
+              ),
+            ],
           ),
-          child: Icon(Icons.radar_rounded, color: Colors.white, size: size * .72),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(size * .38),
+            child: Image.asset(
+              'assets/brand/trackio_icon.png',
+              width: tile,
+              height: tile,
+              fit: BoxFit.cover,
+              filterQuality: FilterQuality.medium,
+            ),
+          ),
         ),
         SizedBox(width: size * .34),
         RichText(

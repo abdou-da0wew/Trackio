@@ -41,11 +41,6 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                   height: 122,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(34),
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [Prussian3.c500, Prussian2.c500],
-                    ),
                     border: Border.all(color: tk.stroke),
                     boxShadow: [
                       BoxShadow(
@@ -55,7 +50,16 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                       ),
                     ],
                   ),
-                  child: const Icon(Icons.radar_rounded, size: 62, color: SmartBlue.c600),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(33),
+                    child: Image.asset(
+                      'assets/brand/trackio_icon.png',
+                      width: 122,
+                      height: 122,
+                      fit: BoxFit.cover,
+                      filterQuality: FilterQuality.medium,
+                    ),
+                  ),
                 ),
               ),
             ),

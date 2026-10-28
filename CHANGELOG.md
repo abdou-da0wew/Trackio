@@ -73,6 +73,17 @@ semantic versioning.
   strings refer to live tracking (English + Arabic, both ARB bundles and
   generated localizations updated in lockstep).
 
+### Added (branding)
+
+- **New Trackio logo** — a radar sweep locking onto a bag, designed from
+  the app's palette tokens (navy `#001233`/`#0B2C82`, accent `#0F85FA`).
+  Ships as vector sources plus a full platform set: web PWA + favicon +
+  maskable icons, Android legacy/adaptive-foreground/monochrome
+  (themed-icon) mipmaps at all five densities, and the complete iOS app
+  icon catalog. `TkWordmark` and the splash screen now render the real
+  mark instead of a generic Material radar glyph; the reproducible
+  ImageMagick pipeline lives in `tool/logo/`.
+
 ### Added (localization)
 
 - **Full Arabic localization (RTL)** via Flutter's official `gen_l10n`
