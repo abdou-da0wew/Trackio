@@ -61,6 +61,17 @@ semantic versioning.
   (`/connect`); the simulation is an explicit offline/QA choice rather
   than the default, and `?shot=` QA deep links continue to stage the
   simulation engine deterministically.
+- **Docs and info brought in line with the live build** — README, PRD
+  (v1.1 status, per-requirement hardware status, roadmap), architecture
+  (dual pipelines, shipped vs vision protocols, QA hooks), demo guide,
+  contributing guide, security policy, web manifest/index and GitHub
+  templates now describe the real BLE link, its limits and the
+  simulation's offline/QA role.
+- **Copy no longer calls the app a demo** — onboarding describes the
+  Bluetooth/RSSI pipeline, auth banners say "offline auth", the settings
+  version line reads `1.1.0 · live ESP32 BLE build`, and event/empty-state
+  strings refer to live tracking (English + Arabic, both ARB bundles and
+  generated localizations updated in lockstep).
 
 ### Added (localization)
 

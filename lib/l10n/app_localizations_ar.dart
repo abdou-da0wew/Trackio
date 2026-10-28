@@ -35,21 +35,21 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get onboarding1Body =>
-      'يدمج Trackio نظام تحديد المواقع في هاتفك ونظام الحقيبة ورابط الراديو ESP32 في إشارة واحدة حية ومستمرة لحقيبتك.';
+      'يتصل Trackio بوحدة ESP32 في حقيبتك عبر البلوتوث ويحوّل قوة الإشارة اللاسلكية الحية إلى قياس مستمر للمسافة والاتجاه.';
 
   @override
   String get onboarding2Title => 'اعرف لحظة ابتعادها';
 
   @override
   String get onboarding2Body =>
-      'أي زيادة غير معتادة في المسافة تُطلق تنبيهًا فوريًا، وتطلب حزمات الذعر من وحدة الحقيبة إشارات عالية التردد وعالية الدقة.';
+      'أي مسافة غير معتادة أو انقطاع في رابط البلوتوث يُطلق تنبيهًا فوريًا، ثم تقودك القياسات الحية عالية التردد إلى استرداد الحقيبة.';
 
   @override
   String get onboarding3Title => 'استعدّها بسرعة';
 
   @override
   String get onboarding3Body =>
-      'مسار استرداد موجّه يجمع كل مصادر الموقع حتى تلتقي بحقيبتك من جديد — ثم تؤكدها بلمسة واحدة.';
+      'رادار حي يرشدك عودةً إلى حقيبتك — ثم تؤكد استلامها بلمسة واحدة.';
 
   @override
   String get loginWelcomeBack => 'مرحبًا بعودتك';
@@ -80,10 +80,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get demoLoginBanner =>
-      'نسخة تجريبية — أي بيانات تُدخلها تُسجّل دخولك.';
+      'مصادقة تجريبية دون اتصال — أي بيانات تُدخلها تُسجّل دخولك.';
 
   @override
-  String get errEnterEmail => 'أدخل بريدًا إلكترونيًا لمتابعة العرض التجريبي';
+  String get errEnterEmail => 'أدخل بريدًا إلكترونيًا للمتابعة';
 
   @override
   String get signupTitle => 'أنشئ حسابك';
@@ -102,7 +102,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get demoSignupBanner =>
-      'نسخة تجريبية — ينشئ التسجيل رمز تحقق وهميًا يظهر في الشاشة التالية.';
+      'مصادقة دون اتصال — ينشئ التسجيل رمز تحقق وهميًا يظهر في الشاشة التالية.';
 
   @override
   String get errFillNameEmail => 'اكتب اسمك وبريدك الإلكتروني للمتابعة';
@@ -119,7 +119,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get otpFallbackEmail => 'بريدك الإلكتروني';
 
   @override
-  String get otpIncorrect => 'الرمز غير صحيح — راجع التلميحة التجريبية أدناه.';
+  String get otpIncorrect => 'الرمز غير صحيح — راجع التلميحة أدناه.';
 
   @override
   String get otpVerify => 'تحقّق وتابع';
@@ -142,7 +142,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get otpDemoNoCode =>
-      'نسخة تجريبية — يظهر الرمز هنا بدل البريد الإلكتروني.';
+      'مصادقة دون اتصال — يظهر الرمز هنا بدل البريد الإلكتروني.';
 
   @override
   String get codeCopied => 'تم نسخ الرمز';
@@ -193,7 +193,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get demoUser => 'مستخدم تجريبي';
+  String get demoUser => 'مستخدم Trackio';
 
   @override
   String updatedAgo(String ago) {
@@ -379,7 +379,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get eventLog => 'سجل الأحداث';
 
   @override
-  String get noEventsYet => 'لا أحداث بعد — ابدأ سيناريو العرض.';
+  String get noEventsYet => 'لا أحداث بعد — ستظهر هنا أحداث التتبع المباشر.';
 
   @override
   String get collectingData => 'جارٍ جمع بيانات التتبع…';
@@ -454,7 +454,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get backendSupabase => 'Supabase · خادم خاص VDS';
 
   @override
-  String get supabaseSyncing => 'مزامنة الأحداث · عرض';
+  String get supabaseSyncing => 'مزامنة الأحداث · محاكاة';
 
   @override
   String get supabaseAuth => 'مصادقة + مزامنة التتبع';
@@ -482,10 +482,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get signOutBody =>
-      'ستبقى جلستك التجريبية وبيانات التتبع المحلية على هذا الجهاز.';
+      'تبقى جلستك المحلية وسجل التتبع على هذا الجهاز.';
 
   @override
-  String get versionLine => 'Trackio 1.0.0 · نسخة عرض لأصحاب المصلحة';
+  String get versionLine => 'Trackio 1.1.0 · نسخة بلوتوث حية لوحدة ESP32';
 
   @override
   String get eventLocationUpdate => 'تحديث موقع';

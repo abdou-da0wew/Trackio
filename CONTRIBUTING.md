@@ -24,8 +24,10 @@ flutter pub get
 flutter run -d chrome   # fastest way to iterate; Android/iOS work identically
 ```
 
-Requirements: Flutter 3.x stable, Dart 3.x. No API keys are needed to run the
-demo — map tiles and the simulation are keyless by design.
+Requirements: Flutter 3.x stable, Dart 3.x. No API keys are needed: the
+live BLE link works peer-to-peer with the ESP32 module, map tiles (used by
+the simulation source) are keyless, and *Explore without hardware* runs the
+app fully offline.
 
 ## Ground rules
 
@@ -49,15 +51,19 @@ If a new shade is genuinely needed, add it to the palette and extend the test
 ### 2. UI consumes ChangeNotifier state only
 
 Screens and widgets must not talk to hardware, networks or storage directly.
-They watch services exposed through `MultiProvider` in `lib/app.dart`
-(`SimulationEngine`, `AuthService`, `SettingsService`, `ScenarioDirector`).
-This is what keeps the demo→production swap a one-file change.
+They watch services exposed through `MultiProvider` in `lib/main.dart`
+(`TrackingController`, `Esp32BleService`, `AuthService`, `SettingsService`,
+`ScenarioDirector`). Tracking code depends on the `TrackingEngine`
+interface, never on a concrete engine, so the live BLE source and the
+offline simulation stay interchangeable. BLE/GATT details stay inside
+`lib/services/ble/`; parsing and RSSI math must match the firmware
+contract in `docs/BLE_INTEGRATION.md`.
 
 ### 3. Analyze and test before you push
 
 ```bash
 flutter analyze   # zero warnings expected
-flutter test      # palette lock test must pass
+flutter test      # palette lock + RSSI/firmware-parity tests must pass
 ```
 
 ### 4. Commit style
@@ -70,29 +76,36 @@ auth: persist session across restarts
 docs: expand ESP32 packet protocol notes
 ```
 
-### 5. Keep the demo honest
+### 5. Keep both sources honest
 
-The demo build must always run offline, deterministically, with no keys.
-When you add a feature, wire it into the simulation engine (or add a mock)
-rather than stubbing UI with dead buttons. If a feature truly can't be
-simulated, mark it clearly as coming soon in the UI.
+The live BLE source must never invent measurements — every distance, RSSI
+or bearing traces to a telemetry frame or a documented derivation. The
+simulation source must always run offline, deterministically and with no
+keys; when you add a feature, wire it into both engines behind the
+`TrackingEngine` interface rather than stubbing UI with dead buttons. If a
+feature exists on only one source, say so explicitly in the UI.
 
 ## Project layout
 
-See `docs/ARCHITECTURE.md` for the full breakdown of layers, the simulation
-pipeline, and how production integrations (platform GPS/BLE channels,
-Supabase, self-hosted tiles) replace the mocks without touching UI code.
+See `docs/ARCHITECTURE.md` for the layer breakdown and
+`docs/BLE_INTEGRATION.md` for the GATT profile, telemetry frame, RSSI math
+and loss rules. Production integrations (Supabase auth, GPS module,
+self-hosted tiles) plug in behind the existing interfaces without touching
+UI code.
 
 ## Where help is wanted
 
-- Real platform channels for phone GPS + radio RSSI (Android/iOS)
+- GPS receiver + battery telemetry on the ESP32 module (unlocks the
+  geographic map in live mode; see `docs/PRD.md` §7)
+- Background foreground service + OS notification channel (M3)
 - `supabase_flutter` auth + session sync against a self-hosted Supabase
-- ESP32 firmware for the bag module (see `docs/ARCHITECTURE.md` § Packet protocol)
-- Localisation beyond English
-- Widget tests for dashboard phase transitions
+- ESP32 firmware: 1 Hz panic cadence, store-and-forward, panic persistence
+- Widget tests for engine phase transitions and the connect flow
+- Localisation beyond English and Arabic
 
 ## Reporting issues
 
-Open a GitHub issue with: Flutter version, platform, steps to reproduce, and
-the deep link (e.g. `?shot=home&state=alert&panel=1`) that exposes the state
-— the demo's stage shortcuts make most states reproducible in one URL.
+Open a GitHub issue with: Flutter version, platform, steps to reproduce.
+For simulation issues include the deep link (e.g.
+`?shot=home&state=alert&panel=1`); for BLE issues include the firmware
+version (`VER`), the device panel response log, and the adapter/OS version.

@@ -13,10 +13,11 @@ labels: enhancement
 
 <!-- What should happen instead? -->
 
-## Demo or production?
+## Where does it belong?
 
-- [ ] Fits the demo build (simulatable, no hardware required)
-- [ ] Production-track (platform channels, ESP32, Supabase — see the roadmap in `docs/PRD.md` §12)
+- [ ] Live BLE source (ESP32 GATT, telemetry, RSSI, pairing — see `docs/BLE_INTEGRATION.md`)
+- [ ] Offline simulation / demo tooling (deterministic engine, scenario, deep links)
+- [ ] Roadmap item (GPS module, Supabase, background service — see `docs/PRD.md` §12)
 
 ## Alternatives considered
 

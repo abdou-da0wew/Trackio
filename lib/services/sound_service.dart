@@ -2,8 +2,8 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart';
 import 'settings_service.dart';
 
-/// Plays demo alarm sounds. All playback is fail-safe: on web, autoplay
-/// policies or missing codecs must never crash the demo.
+/// Plays user-selected alarm sounds. All playback is fail-safe: on web,
+/// autoplay policies or missing codecs must never crash the app.
 class SoundService {
   final AudioPlayer _player = AudioPlayer();
   AlertSound? _configured;

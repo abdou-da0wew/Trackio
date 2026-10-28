@@ -1,4 +1,4 @@
-/// Small formatting helpers used across the demo UI.
+/// Small formatting helpers used across the UI.
 class Fmt {
   static String distance(double meters) {
     if (meters >= 1000) {

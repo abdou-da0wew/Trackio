@@ -35,21 +35,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboarding1Body =>
-      'Trackio fuses your phone GPS, the bag\'s own GPS and the ESP32 radio link into one live, continuous fix on your bag.';
+      'Trackio connects to the ESP32 module in your bag over Bluetooth and turns live radio signal strength into a continuous distance and direction fix.';
 
   @override
   String get onboarding2Title => 'Know the moment it leaves';
 
   @override
   String get onboarding2Body =>
-      'Abnormal distance triggers an instant alert. Panic packets ask the bag module for high-frequency, high-accuracy fixes.';
+      'Abnormal distance or a dropped Bluetooth link triggers an instant alert; high-frequency live telemetry then guides the recovery.';
 
   @override
   String get onboarding3Title => 'Get it back, fast';
 
   @override
   String get onboarding3Body =>
-      'A guided recovery route reconciles every location source until you\'re reunited — then you confirm it with one tap.';
+      'A live radar view walks you back to your bag — then you confirm the reunion with one tap.';
 
   @override
   String get loginWelcomeBack => 'Welcome back';
@@ -79,10 +79,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get createAccount => 'Create an account';
 
   @override
-  String get demoLoginBanner => 'Demo build — any credentials sign you in.';
+  String get demoLoginBanner => 'Offline demo auth — any credentials sign you in.';
 
   @override
-  String get errEnterEmail => 'Enter an email to continue the demo';
+  String get errEnterEmail => 'Enter an email to continue';
 
   @override
   String get signupTitle => 'Create your account';
@@ -101,7 +101,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get demoSignupBanner =>
-      'Demo build — signup generates a mock OTP shown on the next screen.';
+      'Offline auth — signup generates a mock OTP shown on the next screen.';
 
   @override
   String get errFillNameEmail => 'Fill your name and email to continue';
@@ -118,7 +118,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get otpFallbackEmail => 'your email';
 
   @override
-  String get otpIncorrect => 'Incorrect code — check the demo hint below.';
+  String get otpIncorrect => 'Incorrect code — check the hint below.';
 
   @override
   String get otpVerify => 'Verify & continue';
@@ -140,7 +140,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get otpDemoNoCode => 'Demo build — OTP shown here instead of email.';
+  String get otpDemoNoCode => 'Offline auth — the code appears here instead of email.';
 
   @override
   String get codeCopied => 'Code copied';
@@ -191,7 +191,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get demoUser => 'Demo User';
+  String get demoUser => 'Trackio User';
 
   @override
   String updatedAgo(String ago) {
@@ -377,7 +377,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get eventLog => 'EVENT LOG';
 
   @override
-  String get noEventsYet => 'No events yet — start the demo scenario.';
+  String get noEventsYet => 'No events yet — live tracking activity will appear here.';
 
   @override
   String get collectingData => 'Collecting tracking data…';
@@ -452,7 +452,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get backendSupabase => 'Supabase · self-hosted VDS';
 
   @override
-  String get supabaseSyncing => 'syncing events · demo';
+  String get supabaseSyncing => 'syncing events · simulation';
 
   @override
   String get supabaseAuth => 'auth + tracking sync';
@@ -480,11 +480,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get signOutBody =>
-      'Your demo session and local tracking data stay on this device.';
+      'Your local session and tracking history stay on this device.';
 
   @override
   String get versionLine =>
-      'Trackio 1.0.0 · demo build for stakeholder preview';
+      'Trackio 1.1.0 · live ESP32 BLE build';
 
   @override
   String get eventLocationUpdate => 'Location update';

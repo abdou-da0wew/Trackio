@@ -113,6 +113,23 @@ The 🧪 demo lab exposes the engine's commands directly:
 Example: `flutter run -d chrome` then open the printed URL with
 `?shot=home&state=alert&panel=1`.
 
+## Presenting with real hardware (live BLE)
+
+The scripted flow above is the offline fallback; the headline demo is a
+real module:
+
+1. Power the ESP32 follow-car (firmware details in
+   [BLE_INTEGRATION.md](BLE_INTEGRATION.md)).
+2. Sign in → on the connect screen tap **Scan for devices** → choose
+   `ESP32-FollowCar` → enter passkey **246810** in the system dialog.
+3. The dashboard immediately shows live RSSI, path-loss distance and the
+   radar-sweep bearing; walk away to show the −82 dBm warning, cover/power
+   off the module to show a real link-drop alert and auto-reconnect.
+4. The Bluetooth button (bottom-right) opens the device panel: `STAT`,
+   `MODE FOLLOW`, `ARM ON` and the streaming response log.
+5. Web demos need Chrome/Edge over HTTPS (Web Bluetooth); an Android phone
+   gives the smoothest pairing experience.
+
 ## Troubleshooting
 
 | Symptom | Fix |
@@ -124,14 +141,21 @@ Example: `flutter run -d chrome` then open the printed URL with
 
 ## FAQ for stakeholders
 
-**Is this live GPS?** Not yet — this build simulates the fused
-phone-GPS/bag-GPS/radio pipeline deterministically (that's what makes demos
-repeatable). The phase machine, thresholds, alert flow and every screen are
-production-intent; see `docs/ARCHITECTURE.md` §6 for the swap plan.
+**Is this a real Bluetooth link?** Yes — scan, secure pairing (passkey
+246810), GATT telemetry, RSSI distance, radar bearing, reconnect and the
+loss state machine all run against the physical ESP32 module. The
+deterministic simulation shown in this guide is the offline fallback behind
+the same engine interface; see [BLE_INTEGRATION.md](BLE_INTEGRATION.md).
 
-**How far from production?** The UI layer is production-intent. M1 is real
-sensing (platform channels + ESP32 firmware), M2 is the self-hosted
-Supabase/Tigris cloud. Roadmap in `docs/PRD.md` §12.
+**Is there GPS?** Not on the current module board — distance comes from the
+RSSI path-loss model and direction from the servo radar sweep, rendered as
+a polar radar. A GPS-equipped module re-enables the geographic map; see
+`docs/PRD.md` §7 for the hardware requirements.
+
+**How far from production?** The BLE transport, tracking logic and UI are
+real and unit-tested. Remaining work is the self-hosted Supabase/Tigris
+cloud (M2), background service/OS notifications and panic hardening (M3),
+and GPS/battery hardware (M4). Roadmap in `docs/PRD.md` §12.
 
 **What happens to the alarm if the app is killed?** In production the
 foreground service keeps monitoring and the OS notification channel fires

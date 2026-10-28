@@ -16,10 +16,10 @@
 | | |
 |---|---|
 | **Product** | Trackio — smart bag tracking |
-| **Document status** | v1.0 — basis for the current demonstration build |
-| **Platforms** | Android & iOS (Flutter client), web preview for demonstrations |
+| **Document status** | v1.1 — product spec with live BLE implementation status |
+| **Platforms** | Android & iOS (Flutter client), web via Web Bluetooth (Chrome/Edge) |
 | **Repo** | `git@github.com:abdou-da0wew/Trackio.git` (branch `main`) |
-| **Demo build** | This repository, v1.0.0 — full product vision on a simulation engine |
+| **Current build** | v1.1.0 — real ESP32 GATT link drives tracking; deterministic simulation retained as an explicit offline/QA source |
 
 ---
 
@@ -153,33 +153,43 @@ Three subsystems:
 |---|---|
 | FR-A1 | Sign-up with name, e-mail, password; **OTP verification** of the e-mail address before first entry. |
 | FR-A2 | Login with remembered session; logout from Settings. |
-| FR-A3 | Auth backend is Supabase (self-hosted). The demo build implements the identical contract over a mock service so the production swap is a drop-in replacement. |
+| FR-A3 | Auth backend is Supabase (self-hosted). The current build implements the identical contract over an in-memory mock service so the production swap is a drop-in replacement; the BLE tracking pipeline does not depend on it and works fully offline. |
 
 ## 6. User journey (happy path → loss → recovery)
 
 ```
-Install → Sign up → OTP → Pair bag (demo: pre-paired) → Dashboard shows "Safe · 3 m"
+Install → Sign up → OTP → Connect screen → scan ESP32-FollowCar → pair (passkey 246810)
    │
-   ├─ distance creeps to 35 m ──► warning banner ("Bag is drifting")
+   ├─ RSSI weakens past -82 dBm / 30 m fence ──► warning banner
    │
-   ├─ distance > 80 m / link drops ──► FULL-SCREEN ALERT + alarm sound
-   │        └─► panic mode ON (1 Hz fixes, packet counter climbs)
+   ├─ link drops / RSSI ≤ -94 dBm sustained ──► FULL-SCREEN ALERT + alarm sound
+   │        └─► panic mode ON (each 2 Hz telemetry frame counts as a live fix)
    │
-   ├─ user approaches last-known position ──► link re-detected ──► recovery view
+   ├─ user approaches the module ──► link re-detected ──► recovery view
    │
-   └─ distance < 2 m ──► "I found my bag" ──► panic mode OFF ──► celebration ──► Safe
+   └─ "I found my bag" ──► panic mode OFF ──► celebration ──► Safe
 ```
+
+The connect screen also offers *Explore without hardware*, which runs the
+deterministic simulation engine behind the same `TrackingEngine` interface
+(the path used by the `?shot=…` staging deep links).
 
 ## 7. Bag module (ESP32) requirements
 
-| ID | Requirement |
-|---|---|
-| HW-1 | Radio beacon at a configurable interval (default 1 Hz while connected) so the phone can measure link presence/strength. |
-| HW-2 | GPS receiver reporting fixes over the radio link (bag GPS used in fusion; accuracy ~±5 m outdoors). |
-| HW-3 | **Panic mode**: on command from the app, raise reporting to panic cadence (1 Hz GPS + beacon, ±3 m accuracy target), persist across module restarts until cancelled, and maximise battery budget for reporting. |
-| HW-4 | Battery: ≥ 8 h active tracking, ≥ 7 days beacon-only standby; battery % reported in every beacon. |
-| HW-5 | Store-and-forward: if the radio link drops, cache the last GPS fix and transmit it on reconnection ("last known position"). |
-| HW-6 | Physical pairing button / secure pairing channel (v1.1). The demo assumes pairing is complete. |
+The current firmware (`esp32-follow-car`, ESP-IDF v5.5, ESP-WROOM-32)
+implements the GATT server, secure pairing, 10 Hz link-RSSI polling with
+the median-3/EMA filter and log-distance path-loss model, a servo-driven
+radar sweep for bearing, and 2 Hz telemetry notifications. Field-by-field
+mapping lives in [`BLE_INTEGRATION.md`](BLE_INTEGRATION.md).
+
+| ID | Requirement | Firmware status |
+|---|---|---|
+| HW-1 | Radio beacon/link so the phone can measure presence and strength (10 Hz RSSI polling, 2 Hz telemetry) | ✅ shipped |
+| HW-2 | GPS receiver reporting fixes over the radio link (bag GPS used in fusion; ~±5 m outdoors) | ⏳ not on current board — app uses RSSI distance + radar bearing meanwhile |
+| HW-3 | **Panic mode**: high-cadence reporting with tight accuracy, persistent until cancelled | 🔶 partial — app counts every live frame during a loss; 1 Hz panic cadence + persistence pending |
+| HW-4 | Battery: ≥ 8 h active tracking, battery % in every frame | ⏳ current board is wired-powered; app shows "wired power" rather than a fake percentage |
+| HW-5 | Store-and-forward of the last fix across link drops | ⏳ firmware learns the bonded phone address and rescans after disconnects |
+| HW-6 | Secure pairing channel | ✅ shipped — LE Secure Connections + MITM + bond, static passkey `246810` |
 
 ## 8. Backend requirements
 
@@ -283,39 +293,59 @@ Loaded through the `google_fonts` package — the plan is locked in
   overrides instantly.
 - **RTL:** full right-to-left mirroring for Arabic, including navigation and
   map chrome; Zain replaces Rubik automatically when the locale is `ar`.
-- **Locale-free simulation:** engine events carry message codes + params;
-  localized rendering lives in `lib/core/l10n_text.dart`.
+- **Locale-free engines:** both the BLE and simulation engines emit
+  message codes + params; localized rendering lives in
+  `lib/core/l10n_text.dart`, so every event and caption is translatable.
 
-## 10. Demonstration build scope (this repository)
+## 10. Implementation status (this repository)
 
-The current deliverable is a **stakeholder demonstration**: the full product
-vision, workflows and UI, driven by a deterministic simulation instead of live
-hardware. Specifically:
+The app runs two interchangeable tracking sources behind one
+`TrackingEngine` interface; the live BLE source is the default.
 
-**Real, working code:** every screen and interaction, the tracking phase
-machine, thresholds, panic mode, recovery flow, map rendering with real
-keyless tiles, history chart and event log, settings persistence, auth
-screens with OTP flow, alarm sounds, dark/light themes, scripted demo
-scenario with manual triggers and speed control, and URL deep links for
-staging every state.
+**Real, working code — live BLE source:**
 
-**Mocked behind interfaces:** platform GPS/radio (replaced by a fused
-simulation over a Cairo walking loop), the ESP32 module (simulated telemetry:
-battery, RSSI, panic packets), and the Supabase backend (in-memory auth with
-session persistence). Swap instructions live in `docs/ARCHITECTURE.md`.
+- GATT central transport (`flutter_blue_plus`): service-UUID scan, LE
+  Secure Connections pairing with the static passkey, encrypted telemetry
+  and response subscriptions, command writes, MTU negotiation, persisted
+  last-device and exponential-backoff reconnect (FR-T1, FR-T5, HW-6).
+- Firmware-identical RSSI filter and path-loss distance math, unit-tested
+  against the firmware's own host tests; live telemetry frames feed the
+  full phase machine, thresholds, loss/panic flow and recovery (FR-L1–L5).
+- Connect/pair screen, device control panel with the firmware command
+  interpreter, relative polar radar (distance + radar-sweep bearing),
+  wired-power indicator and live history/event log.
+- Android 12+ BLE runtime permissions (legacy location fallback), iOS
+  usage strings, Web Bluetooth support.
+
+**Real, working code — shared by both sources:** every screen and
+interaction, the tracking phase machine, alarm playback with three bundled
+sounds and previews (FR-L6), dark/light themes, English + Arabic with full
+RTL, settings persistence, history chart and event log (FR-H1–H3, FR-S1–S4).
+
+**Deterministic simulation source (offline/QA):** the Cairo walking-loop
+engine, scripted scenario with manual triggers and speed control, keyless
+Esri geographic map, and `?shot=…` staging deep links — all behind the same
+interface the live engine implements.
+
+**Mocked behind interfaces:** auth (in-memory service with the Supabase
+OTP contract and persisted session; FR-A1–A3) and the Supabase/Tigris
+backend. Swap instructions live in [`ARCHITECTURE.md`](ARCHITECTURE.md)
+and [`BLE_INTEGRATION.md`](BLE_INTEGRATION.md).
 
 ## 11. Repository conventions
 
 - Remote: `git@github.com:abdou-da0wew/Trackio.git`, primary branch `main`.
-- History begins with the `first commit` (README), followed by the demo
-  build and documentation.
+- The v1.0 demo build introduced the UI, phase machine and deterministic
+  simulation; v1.1 replaced the demo default with the real ESP32 BLE link
+  described in [`BLE_INTEGRATION.md`](BLE_INTEGRATION.md).
 - Commit style and code rules: see `CONTRIBUTING.md`.
 
-## 12. Roadmap after the demo
+## 12. Roadmap
 
-| Milestone | Contents |
-|---|---|
-| **M1 — Real sensing** | Platform channels for phone GPS + radio RSSI; foreground service / background refresh policies; ESP32 firmware v0 (beacon + GPS over BLE). |
-| **M2 — Cloud** | Self-hosted Supabase on VDS; swap mock auth for `supabase_flutter`; history sync; Tigris for exports. |
-| **M3 — Panic hardening** | Panic-packet protocol finalisation, store-and-forward on the module, notification-channel deep link from the OS alert. |
-| **M4 — Ship** | Play Store / TestFlight polish, battery whitelisting UX, localisation, onboarding analytics. |
+| Milestone | Contents | Status |
+|---|---|---|
+| **M1 — Real sensing** | BLE GATT link, secure pairing, RSSI distance + radar bearing, reconnect, six-state machine on real link events | ✅ shipped (GPS fusion still pending — module currently has no GPS) |
+| **M2 — Cloud** | Self-hosted Supabase on VDS; swap mock auth for `supabase_flutter`; history sync; Tigris for exports | ⏳ next |
+| **M3 — Panic hardening & background** | Foreground service + OS notification channel, 1 Hz panic cadence on the module, store-and-forward last fix, panic persistence across module restarts | ⏳ planned |
+| **M4 — Module hardware** | GPS receiver and battery telemetry on the ESP32 board, enabling the geographic map and HW-2/HW-4 requirements | ⏳ planned |
+| **M5 — Ship** | Play Store / TestFlight polish, battery whitelisting UX, onboarding analytics | ⏳ planned |

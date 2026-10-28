@@ -15,21 +15,25 @@ labels: bug
 2.
 3.
 
-## Deep link
+## Source & reproduction
 
-<!-- The demo's stage shortcuts make most states reproducible in one URL.
-     Which one shows the problem? e.g. ?shot=home&state=alert&panel=1 -->
+- Tracking source: live BLE / offline simulation
+- Simulation deep link, if relevant (e.g. `?shot=home&state=alert&panel=1`):
 
 ```
 ?shot=...&state=...
 ```
 
+- BLE issues: module name, firmware `VER` output, device-panel response log,
+  pairing passkey attempt, adapter state:
+
 ## Environment
 
 - Platform (web / Android / iOS):
 - Flutter version (`flutter --version`):
+- OS / device model:
 - Theme (dark / light):
 
 ## Evidence
 
-<!-- Screenshots, console output, or a screen recording. -->
+<!-- Screenshots, console output, BLE logs, or a screen recording. -->

@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'simulation_engine.dart';
 
-/// Runs the scripted "movie mode" used during the stakeholder demo.
+/// Runs the scripted "movie mode" for the offline simulation source.
 ///
 /// One tap plays the entire loss-recovery story with captions. Every phase
 /// maps to real engine state transitions so the UI, alerts and history all

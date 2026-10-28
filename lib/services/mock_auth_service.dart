@@ -3,11 +3,13 @@ import 'package:flutter/foundation.dart';
 import '../models/models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Mock authentication for the demonstration build.
+/// In-memory authentication used until the self-hosted Supabase backend
+/// lands.
 ///
 /// Mirrors the production Supabase auth contract (signup → OTP verify →
 /// session) so the real backend can be swapped in behind this interface
-/// without touching the UI layer.
+/// without touching the UI layer. The live BLE tracking pipeline does not
+/// depend on this service and works fully offline.
 class AuthService extends ChangeNotifier {
   AuthService(this._prefs) {
     _user = _prefs.getString('demo_user_name') != null

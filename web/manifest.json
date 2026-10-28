@@ -1,11 +1,11 @@
 {
-    "name": "trackio",
-    "short_name": "trackio",
+    "name": "Trackio",
+    "short_name": "Trackio",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#001233",
+    "theme_color": "#0052EB",
+    "description": "Smart bag tracking with a live ESP32 Bluetooth link — distance, radar bearing and lost-bag alerts.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

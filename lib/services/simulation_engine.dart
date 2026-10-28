@@ -7,7 +7,12 @@ import '../models/models.dart';
 import 'settings_service.dart';
 import 'tracking/tracking_engine.dart';
 
-/// Simulates the complete Trackio tracking pipeline for the demo build:
+/// Deterministic offline/QA implementation of [TrackingEngine].
+///
+/// The live app runs [BleTrackingEngine] against real ESP32 hardware; this
+/// simulation is the explicit "Explore without hardware" source and the
+/// engine behind the `?shot=…` staging deep links and scripted demo scenario.
+/// It reproduces the complete pipeline:
 ///
 ///  • phone GPS + bag GPS + radio (ESP32) fixes fused into one distance signal
 ///  • continuous distance monitoring with warning / lost thresholds
@@ -15,9 +20,8 @@ import 'tracking/tracking_engine.dart';
 ///  • connection loss + automatic reconnection attempts
 ///  • full event + distance history for the History screen
 ///
-/// In production this class is replaced by platform channels (GPS, BLE/FM
-/// radio) and the Supabase sync; the demo UI only consumes ChangeNotifier
-/// state, so the swap is isolated from the presentation layer.
+/// Both engines implement the same [TrackingEngine] surface, so the
+/// presentation layer never knows which source is active.
 class SimulationEngine extends ChangeNotifier implements TrackingEngine {
   SimulationEngine(this._settings);
 
@@ -75,7 +79,7 @@ class SimulationEngine extends ChangeNotifier implements TrackingEngine {
   DateTime lastBagFix = DateTime.now();
   String? scenarioPhase;        // machine-readable demo phase (caption resolved in UI)
   bool scenarioRunning = false;
-  double speedMultiplier = 1;   // 1x / 4x / 8x for stakeholders
+  double speedMultiplier = 1;   // 1x / 4x / 8x for scripted scenarios
 
   // ── history ───────────────────────────────────────────────────────────
   final List<LatLng> phoneRoute = [];

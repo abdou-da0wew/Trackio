@@ -4,7 +4,8 @@
 
 | Version | Supported |
 |---|---|
-| 1.0.x (demo build) | ✅ |
+| 1.1.x (live ESP32 BLE build) | ✅ |
+| 1.0.x (simulation-only build) | ⚠️ upgrade to 1.1.x |
 
 ## Reporting a vulnerability
 
@@ -22,10 +23,15 @@ responsibly:
 
 ## Scope notes
 
-- The demo build is intentionally self-contained: no production credentials,
-  no real user data, mock auth only. Still, reports about the auth contract,
-  persistence handling and web build are welcome — the same code shapes the
-  production client.
+- The BLE link uses LE Secure Connections with MITM protection and bonding
+  over a static 6-digit passkey (`246810`, defined by the firmware). GATT
+  characteristics are encrypted, so unpaired clients cannot read telemetry
+  or write commands. Reports covering pairing, bonding, characteristic
+  permissions, reconnect behavior and Web Bluetooth exposure are welcome.
+- The app remains fully self-contained: no production credentials, no real
+  user data, mock auth only. Reports about the auth contract, persistence
+  handling and web build are welcome — the same code shapes the production
+  client.
 - The production roadmap (self-hosted Supabase + Tigris on a private VDS)
   will get its own hardening notes (row-level security, OTP rate limits,
   packet signing) as those components land. See

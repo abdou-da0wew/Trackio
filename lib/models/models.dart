@@ -1,6 +1,6 @@
 import 'package:latlong2/latlong.dart';
 
-/// Core domain models for the Trackio demo build.
+/// Core domain models shared by the live BLE and simulation engines.
 
 enum TrackStatus { tracking, warning, lost, panic, recovering, found }
 

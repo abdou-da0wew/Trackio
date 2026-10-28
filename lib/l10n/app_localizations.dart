@@ -149,7 +149,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboarding1Body.
   ///
   /// In en, this message translates to:
-  /// **'Trackio fuses your phone GPS, the bag\'s own GPS and the ESP32 radio link into one live, continuous fix on your bag.'**
+  /// **'Trackio connects to your ESP32 bag module over Bluetooth: secure pairing, real-time telemetry and a continuous RSSI distance estimate.'**
   String get onboarding1Body;
 
   /// No description provided for @onboarding2Title.
@@ -161,7 +161,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboarding2Body.
   ///
   /// In en, this message translates to:
-  /// **'Abnormal distance triggers an instant alert. Panic packets ask the bag module for high-frequency, high-accuracy fixes.'**
+  /// **'Distance spikes, weak signal or a lost link trigger instant warnings and a panic alert — with radar-style bearing to guide your search.'**
   String get onboarding2Body;
 
   /// No description provided for @onboarding3Title.
@@ -173,7 +173,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboarding3Body.
   ///
   /// In en, this message translates to:
-  /// **'A guided recovery route reconciles every location source until you\'re reunited — then you confirm it with one tap.'**
+  /// **'The relative radar guides you back to your bag, and reconnect + signal recovery are tracked on every step until you confirm the reunion.'**
   String get onboarding3Body;
 
   /// No description provided for @loginWelcomeBack.
@@ -233,13 +233,13 @@ abstract class AppLocalizations {
   /// No description provided for @demoLoginBanner.
   ///
   /// In en, this message translates to:
-  /// **'Demo build — any credentials sign you in.'**
+  /// **'Offline auth — any credentials sign you in.'**
   String get demoLoginBanner;
 
   /// No description provided for @errEnterEmail.
   ///
   /// In en, this message translates to:
-  /// **'Enter an email to continue the demo'**
+  /// **'Enter an email to continue'**
   String get errEnterEmail;
 
   /// No description provided for @signupTitle.
@@ -275,7 +275,7 @@ abstract class AppLocalizations {
   /// No description provided for @demoSignupBanner.
   ///
   /// In en, this message translates to:
-  /// **'Demo build — signup generates a mock OTP shown on the next screen.'**
+  /// **'Offline auth — signup generates a mock OTP shown on the next screen.'**
   String get demoSignupBanner;
 
   /// No description provided for @errFillNameEmail.
@@ -305,7 +305,7 @@ abstract class AppLocalizations {
   /// No description provided for @otpIncorrect.
   ///
   /// In en, this message translates to:
-  /// **'Incorrect code — check the demo hint below.'**
+  /// **'Incorrect code — check the hint below.'**
   String get otpIncorrect;
 
   /// No description provided for @otpVerify.
@@ -341,7 +341,7 @@ abstract class AppLocalizations {
   /// No description provided for @otpDemoNoCode.
   ///
   /// In en, this message translates to:
-  /// **'Demo build — OTP shown here instead of email.'**
+  /// **'Offline auth — OTP shown here instead of email.'**
   String get otpDemoNoCode;
 
   /// No description provided for @codeCopied.
@@ -431,7 +431,7 @@ abstract class AppLocalizations {
   /// No description provided for @demoUser.
   ///
   /// In en, this message translates to:
-  /// **'Demo User'**
+  /// **'Trackio User'**
   String get demoUser;
 
   /// No description provided for @updatedAgo.
@@ -767,7 +767,7 @@ abstract class AppLocalizations {
   /// No description provided for @noEventsYet.
   ///
   /// In en, this message translates to:
-  /// **'No events yet — start the demo scenario.'**
+  /// **'No events yet — events from live tracking will appear here.'**
   String get noEventsYet;
 
   /// No description provided for @collectingData.
@@ -911,7 +911,7 @@ abstract class AppLocalizations {
   /// No description provided for @supabaseSyncing.
   ///
   /// In en, this message translates to:
-  /// **'syncing events · demo'**
+  /// **'syncing events · simulation'**
   String get supabaseSyncing;
 
   /// No description provided for @supabaseAuth.
@@ -965,13 +965,13 @@ abstract class AppLocalizations {
   /// No description provided for @signOutBody.
   ///
   /// In en, this message translates to:
-  /// **'Your demo session and local tracking data stay on this device.'**
+  /// **'Your local session and tracking history stay on this device.'**
   String get signOutBody;
 
   /// No description provided for @versionLine.
   ///
   /// In en, this message translates to:
-  /// **'Trackio 1.0.0 · demo build for stakeholder preview'**
+  /// **'Trackio 1.1.0 · live ESP32 BLE build'**
   String get versionLine;
 
   /// No description provided for @eventLocationUpdate.
